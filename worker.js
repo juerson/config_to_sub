@@ -3181,7 +3181,12 @@ var worker_default = {
         return compareByLetters;
       });
       const resultString = sortedArray.join("\n");
-      return new Response(resultString);
+      return new Response(resultString, {
+        status: 200,
+        headers: {
+          'Content-Type': 'text/plain; charset=UTF-8',
+        },
+      });
     } catch (error) {
       console.error(`Error in fetch function: ${error.message}`);
       return new Response(`Error fetching web page: ${error.message}`, { status: 500 });
