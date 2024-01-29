@@ -642,7 +642,12 @@ export default {
       const resultString = sortedArray.join('\n');
 
       // 在这里可以对内容进行处理
-      return new Response(resultString);
+      return new Response(resultString, {
+        status: 200,
+        headers: {
+          'Content-Type': 'text/plain; charset=UTF-8',
+        },
+      });
     } catch (error) {
       console.error(`Error in fetch function: ${error.message}`);
       // 返回一个带有错误信息的响应
