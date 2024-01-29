@@ -1,4 +1,4 @@
-import yaml from 'js-yaml'; # npm install js-yaml
+import yaml from 'js-yaml'; // npm install js-yaml
 
 // ------------------------------------------ 解析数组中的hysteria节点 ------------------------------------------
 
