@@ -15,14 +15,15 @@ function parse_hysteria(outbounds_n) {
   let auth = findFieldValue(outbounds_n, "auth_str") || findFieldValue(outbounds_n, 'auth-str');
   let peer = findFieldValue(outbounds_n, "server_name") || findFieldValue(outbounds_n, 'sni') || "";
 
-  let protocol = findFieldValue(outbounds_n, 'protocol') === "hysteria" ? "" : findFieldValue(outbounds_n, 'protocol') || "";
+  let protocolValue = findFieldValue(outbounds_n, 'protocol');
+  let protocol = protocolValue === "hysteria" ? "" : protocolValue || "";
 
   let insecureFieldValue = findFieldValue(outbounds_n, "insecure");
   let insecure;
   if (insecureFieldValue === null || insecureFieldValue === true) {
     insecure = 1
   } else if (insecureFieldValue === false) {
-    insecure = 0
+    insecure = ""
   }
 
   let alpnValue = findFieldValue(outbounds_n, "alpn");
@@ -75,7 +76,7 @@ function parse_hy2(outbounds_n) {
 
   let up = findFieldValue(outbounds_n, 'up') || "0";
   let down = findFieldValue(outbounds_n, 'down') || "0";
-  // 不管upmbps_str是纯数字的字符串呢，还是数字和其它字符的字符串，都只保留数字，其它的字符都丢弃
+  // 不管upmbps_str是纯数字的字符串呢，还是数字和其它字符组合的字符串，都只保留数字，其它的字符都丢弃
   let upmbps = parseInt(String(up).replace(/\D/g, ''), 10) || 0;
   let downmbps = parseInt(String(down).replace(/\D/g, ''), 10) || 0;
 
@@ -84,7 +85,7 @@ function parse_hy2(outbounds_n) {
   if (insecureFieldValue === null || insecureFieldValue === true) {
     insecure = 1
   } else if (insecureFieldValue === false) {
-    insecure = 0
+    insecure = ""
   }
 
   let hy2Dict = {
@@ -117,24 +118,35 @@ function parse_vless(outbounds_n) {
   }
   let port = findFieldValue(outbounds_n, "port");
   let uuid = findFieldValue(outbounds_n, "id") || findFieldValue(outbounds_n, 'uuid'); // "||" 左边为json，右边是yaml
-  let encryption = findFieldValue(outbounds_n, "encryption") || "none";
+  let encryption = findFieldValue(outbounds_n, "encryption") || "none"; // 加密方式
+  let flow = findFieldValue(outbounds_n, 'flow') || "";
   let network = findFieldValue(outbounds_n, "network");
-  let tls_security = findFieldValue(outbounds_n.streamSettings, "security");
-  if (tls_security === null) {
-    tls_security = findFieldValue(outbounds_n, 'tls') === true ? "tls" : '';
+  let host = findFieldValue(outbounds_n, "Host") || findFieldValue(outbounds_n, 'host');
+  let path = findFieldValue(outbounds_n, "path") || "";
+  // 传输层安全(TLS)
+  let tls_security;
+  if (findFieldValue(outbounds_n, 'reality-opts')) {
+    tls_security = "reality";
+  } else {
+    let tls = findFieldValue(outbounds_n.streamSettings, 'security') || findFieldValue(outbounds_n, 'tls') || "";
+    tls_security = tls === true ? 'tls' || "" : tls;
   }
   let serverName = findFieldValue(outbounds_n, "serverName") || findFieldValue(outbounds_n, 'servername');
   let fingerprint = findFieldValue(outbounds_n, "fingerprint") || findFieldValue(outbounds_n, 'client-fingerprint');
-  let path = findFieldValue(outbounds_n, "path");
-  let host = findFieldValue(outbounds_n, "Host") || findFieldValue(outbounds_n, 'host');
+  let public_key = findFieldValue(outbounds_n, 'public-key') || "";
+  let short_id = findFieldValue(outbounds_n, 'short-id') || "";
   let vlessDict = {
-    "encryption": encryption,
-    "security": tls_security,
-    "sni": host,
+    "encryption": encryption, // 加密方式
+    "flow": flow,
+    "security": tls_security, // 传输层安全(TLS)
+    "sni": serverName,
     "fp": fingerprint,
-    "type": network,
-    "host": serverName,
-    "path": path
+    "pbk": public_key,
+    "sid": short_id,
+    "type": network, // 传输协议(network)
+    "host": host, // 伪装域名(host)
+    "path": path,
+    "headerType": "none" // 伪装类型
   }
   // 过滤掉值为空的键值对
   const filteredParams = Object.fromEntries(
@@ -157,41 +169,43 @@ function parse_vmess(outbounds_n) {
   let port = findFieldValue(outbounds_n, 'port');
   let uuid = findFieldValue(outbounds_n, 'id') || findFieldValue(outbounds_n, 'uuid');
   let alterId = findFieldValue(outbounds_n, 'alterId') || "";
-  let encryption = findFieldValue(outbounds_n, 'encryption') || "none";
 
-  let cipher = findFieldValue(outbounds_n, 'cipher') || "";
-  let auto_security = cipher === "" ? findFieldValue(outbounds_n.settings, 'security') || "auto" : cipher;
+  // 加密方式(security)
+  let auto_security = findFieldValue(outbounds_n, 'cipher') || findFieldValue(outbounds_n.settings, 'security') || "auto";
 
+  // 传输协议(network)
   let network = findFieldValue(outbounds_n, 'network');
+  // 伪装类型(type)
+  let type_encryption = findFieldValue(outbounds_n, 'encryption') || "none";
 
-  let tls = findFieldValue(outbounds_n, 'tls') || "";
-  let tls_security = tls === "" ? findFieldValue(outbounds_n.streamSettings, 'security') || "" : tls;
-  if (tls_security == true) {
-    tls_security = 'tls';
-  } else if (tls_security == false) {
-    tls_security = "";
+  // 传输层安全(TLS)
+  let tls = findFieldValue(outbounds_n.streamSettings, 'security') || findFieldValue(outbounds_n, 'tls') || "";
+  let tls_security = tls === true ? 'tls' || "" : tls
+
+  let path = findFieldValue(outbounds_n, 'path') || findFieldValue(outbounds_n, 'ws-path') || "/";
+  // 伪装域名(host)
+  let host = findFieldValue(outbounds_n, 'Host') || findFieldValue(outbounds_n, 'host') || "";
+  let serverName = findFieldValue(outbounds_n, 'sni') || findFieldValue(outbounds_n, 'serverName') || "";
+  if (serverName === "" && host === "") {
+    host = address;
   }
-
-  let path = findFieldValue(outbounds_n, 'path') || "";
-  let host = findFieldValue(outbounds_n, 'Host') || "";
-  let serverName = findFieldValue(outbounds_n, 'serverName') || findFieldValue(outbounds_n, 'sni') || "";
-
-  // let allowInsecure = findFieldValue(outbounds_n, 'allowInsecure');
-
+  let fp = findFieldValue(outbounds_n, 'client-fingerprint') || "";
   let vmess_dict = {
-    "add": address,
-    "aid": alterId,
-    "host": serverName,
-    "id": uuid,
-    "net": network,
-    "path": path,
-    "port": port,
+    "v": "2",
     "ps": `[vmess]_${address}:${port}`,
-    "scy": auto_security,
-    "sni": host,
-    "tls": tls_security,
-    "type": encryption,
-    "v": "2"
+    "add": address,
+    "port": port,
+    "id": uuid,
+    "aid": alterId, // 额外ID(alterId)
+    "scy": auto_security, // 加密方式(security)
+    "net": network, // 传输协议(network)
+    "type": type_encryption, // 伪装类型(type)
+    "host": host, // 伪装域名(host)
+    "path": path, // 路径
+    "tls": tls_security, // 传输层安全(TLS)
+    "sni": serverName,
+    "alpn": "",
+    "fp": fp
   }
   // 将对象转换为 JSON 字符串（方便后面进行base64编码）
   const jsonString = JSON.stringify(vmess_dict);
@@ -220,7 +234,6 @@ function parse_shadowsocks(outbounds_n) {
   let method = findFieldValue(outbounds_n, 'method') || findFieldValue(outbounds_n, 'cipher');
   let password = findFieldValue(outbounds_n, 'password');
   let method_with_password = `${method}:${password}`;
-
   let base64EncodedString = btoa(method_with_password);
 
   let ss = `ss://${base64EncodedString}@${address}:${port}#[ss]_${address}`;
@@ -241,7 +254,29 @@ function parse_trojan(outbounds_n) {
   let path = findFieldValue(outbounds_n, 'path') || "";
   let host = findFieldValue(outbounds_n, 'Host') || "";
   let sni = findFieldValue(outbounds_n, 'sni') || "";
-  let trojan = `trojan://${password}@${server}:${port}?security=tls&sni=${sni}&type=${network}&host=${host}&path=${path}&headerType=none#[trojan]_${server}`;
+  let alpn = findFieldValue(outbounds_n, 'alpn') || ""; // 没有确定字段是否这个名字
+  let tls_security = "";
+  if (sni) {
+    tls_security = "tls"
+  }
+  let trojanDict = {
+    "security": tls_security,
+    "allowInsecure": 1,
+    "sni": sni,
+    "type": network,
+    "host": host,
+    "alpn": alpn,
+    "path": path
+  }
+
+  // 过滤掉值为空的键值对
+  const filteredParams = Object.fromEntries(
+    Object.entries(trojanDict).filter(([key, value]) => value !== '' && value !== null && value !== undefined)
+  );
+  // 进行 URL 参数编码
+  const encodedParams = new URLSearchParams(filteredParams).toString();
+
+  let trojan = `trojan://${password}@${server}:${port}?${encodedParams}#[trojan]_${server}`;
 
   return trojan;
 }
@@ -249,6 +284,16 @@ function parse_trojan(outbounds_n) {
 // ------------------------------------------ 解析数组中的tuic节点 ------------------------------------------
 
 function parse_tuic(outbounds_n) {
+  let uuid = findFieldValue(outbounds_n, 'uuid');
+  let password = findFieldValue(outbounds_n, 'password');
+  let server = findFieldValue(outbounds_n, 'server');
+  if (server == "127.0.0.1") {
+    return "";
+  }
+  let port = findFieldValue(outbounds_n, 'port');
+  let congestion_controller = findFieldValue(outbounds_n, 'congestion-controller');
+  let udp_relay_mode = findFieldValue(outbounds_n, 'udp-relay-mode');
+  let sni = findFieldValue(outbounds_n, 'sni') || "";
   let alpnValue = findFieldValue(outbounds_n, "alpn");
   var alpn;
   if (alpnValue.length === 1) {
@@ -258,17 +303,20 @@ function parse_tuic(outbounds_n) {
     // 如果数组有多个元素，使用逗号连接
     alpn = alpnValue.join(',');
   }
-  let uuid = findFieldValue(outbounds_n, 'uuid');
-  let password = findFieldValue(outbounds_n, 'password');
-  let server = findFieldValue(outbounds_n, 'server');
-  if (server == "127.0.0.1") {
-    return "";
+  let tuicDict = {
+    "congestion_control": congestion_controller,
+    "udp_relay_mode": udp_relay_mode,
+    "alpn": alpn,
+    "sni": sni,
+    "allow_insecure": 1
   }
-  let port = findFieldValue(outbounds_n, 'port');
-  let congestion_controller = findFieldValue(outbounds_n, 'congestion-controller');
-  let sni = findFieldValue(outbounds_n, 'sni') || "";
-  let udp_relay_mode = findFieldValue(outbounds_n, 'udp-relay-mode');
-  let tuic = `tuic://${uuid}:${password}@${server}:${port}?congestion_control=${congestion_controller}&alpn=${alpn}&sni=${sni}&udp_relay_mode=${udp_relay_mode}&allow_insecure=1#[tuic]_${server}`;
+  // 过滤掉值为空的键值对
+  const filteredParams = Object.fromEntries(
+    Object.entries(tuicDict).filter(([key, value]) => value !== '' && value !== null && value !== undefined)
+  );
+  // 进行 URL 参数编码
+  const encodedParams = new URLSearchParams(filteredParams).toString();
+  let tuic = `tuic://${uuid}:${password}@${server}:${port}?${encodedParams}#[tuic]_${server}`;
 
   return tuic;
 }
@@ -304,7 +352,7 @@ async function fetchAndProcessUrl(url) {
     if (insecureFieldValue === null || insecureFieldValue === true) {
       insecure = 1;
     } else if (insecureFieldValue === false) {
-      insecure = 0;
+      insecure = "";
     }
 
     // hy1
@@ -351,10 +399,6 @@ async function fetchAndProcessUrl(url) {
       if (hysteriaDict["obfsParam"] == "") {
         delete hysteriaDict["obfs"];
       }
-      // 没有对应的值，就从hysteriaDict中删除
-      if (hysteriaDict["protocol"] === "") {
-        delete hysteriaDict["protocol"];
-      }
       // 过滤掉值为空的键值对
       const filteredParams = Object.fromEntries(
         Object.entries(hysteriaDict).filter(([key, value]) => value !== '' && value !== null && value !== undefined)
@@ -377,7 +421,7 @@ async function fetchAndProcessUrl(url) {
 
       return naive
     }
-
+    // 以下为同一个json或yaml文件中，可能含多个节点
   } else if (outbounds !== null && Array.isArray(outbounds)) {
     /** 判断该json数据可能有多个节点 */
 
@@ -385,8 +429,8 @@ async function fetchAndProcessUrl(url) {
     const uniqueSet = new Set();
     // 遍历数组中的节点
     for (var i = 0; i < outbounds.length; i++) {
-      let proxyType = findFieldValue(outbounds[i], "type"); // yaml
-      let protocol = findFieldValue(outbounds[i], "protocol"); // json
+      // 左边protocol为json、右边type为yaml
+      let proxyType = findFieldValue(outbounds[i], "protocol") || findFieldValue(outbounds[i], "type");
       // 检查到是hysteria类型的节点
       if (proxyType === "hysteria") {
         let hy1 = parse_hysteria(outbounds[i]);
@@ -394,19 +438,19 @@ async function fetchAndProcessUrl(url) {
           uniqueSet.add(hy1);
         }
         // 检查到是vless类型的节点
-      } else if (protocol === "vless" || proxyType === "vless") {
+      } else if (proxyType === "vless") {
         let vless = parse_vless(outbounds[i]);
         if (vless) {
           uniqueSet.add(vless);
         }
-        // 检查到是vmess类型的节点(条件判断中"||" 左边是json的，右边是yaml的)
-      } else if (protocol === "vmess" || proxyType === "vmess") {
+        // 检查到是vmess类型的节点
+      } else if (proxyType === "vmess") {
         let vmess = parse_vmess(outbounds[i]);
         if (vmess) {
           uniqueSet.add(vmess)
         }
-        // 检查到是shadowsocks类型的节点(条件判断中"||" 左边是json的，右边是yaml的)
-      } else if (protocol === "shadowsocks" || proxyType === 'ss') {
+        // 检查到是shadowsocks类型的节点
+      } else if (proxyType === "shadowsocks" || proxyType === 'ss') {
         let ss = parse_shadowsocks(outbounds[i]);
         if (ss) {
           uniqueSet.add(ss);
@@ -417,11 +461,13 @@ async function fetchAndProcessUrl(url) {
         if (trojan) {
           uniqueSet.add(trojan);
         }
+        // 检查到是hy2类型的节点
       } else if (proxyType === "hysteria2" || proxyType === "hy2") {
         let hy2 = parse_hy2(outbounds[i]);
         if (hy2) {
           uniqueSet.add(hy2);
         }
+        // 检查到是tuic类型的节点
       } else if (proxyType === "tuic") {
         let tuic = parse_tuic(outbounds[i]);
         if (tuic) {
@@ -446,17 +492,15 @@ async function fetchWebPageContent(url) {
 
     // 检查响应状态
     if (!response.ok) {
-      throw new Error(`${url} 获取失败: ${response.status}`);
+      throw new Error(`获取失败: ${response.status}`);
     }
 
-    // 读取并返回文本内容
+    // 读取并返回文本内容，同时替换"!<str>"
     let content = await response.text();
-    content = content.replace(/!<str>/g, ""); // 替换yaml的中的"!<str>"字符串
-
-    return content;
+    return content.replace(/!<str>/g, "");
   } catch (error) {
-    console.error(`获取${url} 网页内容错误: ${error.message}`);
-    return "{}";
+    console.error(`获取${url} 网页内容失败: ${error.message}`);
+    return {};
   }
 }
 
@@ -606,7 +650,7 @@ const targetUrls = [
   'https://gitlab.com/free9999/ipupdate/-/raw/master/quick/3/config.yaml',
   'https://www.gitlabip.xyz/Alvin9999/pac2/master/quick/3/config.yaml',
   'https://www.githubip.xyz/Alvin9999/pac2/master/quick/4/config.yaml',
-  'https://fastly.jsdelivr.net/gh/Alvin9999/pac2@latest/quick/4/config.yaml'
+  'https://fastly.jsdelivr.net/gh/Alvin9999/pac2@latest/quick/4/config.yaml',
 ];
 
 // 程序总入口
