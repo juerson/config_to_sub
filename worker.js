@@ -2704,13 +2704,14 @@ function parse_hysteria(outbounds_n) {
   let downmbps = parseInt(String(downmbps_str).replace(/\D/g, ""), 10) || 0;
   let auth = findFieldValue(outbounds_n, "auth_str") || findFieldValue(outbounds_n, "auth-str");
   let peer = findFieldValue(outbounds_n, "server_name") || findFieldValue(outbounds_n, "sni") || "";
-  let protocol = findFieldValue(outbounds_n, "protocol") === "hysteria" ? "" : findFieldValue(outbounds_n, "protocol") || "";
+  let protocolValue = findFieldValue(outbounds_n, "protocol");
+  let protocol = protocolValue === "hysteria" ? "" : protocolValue || "";
   let insecureFieldValue = findFieldValue(outbounds_n, "insecure");
   let insecure;
   if (insecureFieldValue === null || insecureFieldValue === true) {
     insecure = 1;
   } else if (insecureFieldValue === false) {
-    insecure = 0;
+    insecure = "";
   }
   let alpnValue = findFieldValue(outbounds_n, "alpn");
   var alpn;
@@ -2757,7 +2758,7 @@ function parse_hy2(outbounds_n) {
   if (insecureFieldValue === null || insecureFieldValue === true) {
     insecure = 1;
   } else if (insecureFieldValue === false) {
-    insecure = 0;
+    insecure = "";
   }
   let hy2Dict = {
     "upmbps": upmbps,
@@ -2782,23 +2783,38 @@ function parse_vless(outbounds_n) {
   let port = findFieldValue(outbounds_n, "port");
   let uuid = findFieldValue(outbounds_n, "id") || findFieldValue(outbounds_n, "uuid");
   let encryption = findFieldValue(outbounds_n, "encryption") || "none";
+  let flow = findFieldValue(outbounds_n, "flow") || "";
   let network = findFieldValue(outbounds_n, "network");
-  let tls_security = findFieldValue(outbounds_n.streamSettings, "security");
-  if (tls_security === null) {
-    tls_security = findFieldValue(outbounds_n, "tls") === true ? "tls" : "";
+  let host = findFieldValue(outbounds_n, "Host") || findFieldValue(outbounds_n, "host");
+  let path = findFieldValue(outbounds_n, "path") || "";
+  let tls_security;
+  if (findFieldValue(outbounds_n, "reality-opts")) {
+    tls_security = "reality";
+  } else {
+    let tls = findFieldValue(outbounds_n.streamSettings, "security") || findFieldValue(outbounds_n, "tls") || "";
+    tls_security = tls === true ? "tls" : tls;
   }
   let serverName = findFieldValue(outbounds_n, "serverName") || findFieldValue(outbounds_n, "servername");
   let fingerprint = findFieldValue(outbounds_n, "fingerprint") || findFieldValue(outbounds_n, "client-fingerprint");
-  let path = findFieldValue(outbounds_n, "path");
-  let host = findFieldValue(outbounds_n, "Host") || findFieldValue(outbounds_n, "host");
+  let public_key = findFieldValue(outbounds_n, "public-key") || "";
+  let short_id = findFieldValue(outbounds_n, "short-id") || "";
   let vlessDict = {
     "encryption": encryption,
+    // 加密方式
+    "flow": flow,
     "security": tls_security,
-    "sni": host,
+    // 传输层安全(TLS)
+    "sni": serverName,
     "fp": fingerprint,
+    "pbk": public_key,
+    "sid": short_id,
     "type": network,
-    "host": serverName,
-    "path": path
+    // 传输协议(network)
+    "host": host,
+    // 伪装域名(host)
+    "path": path,
+    "headerType": "none"
+    // 伪装类型
   };
   const filteredParams = Object.fromEntries(
     Object.entries(vlessDict).filter(([key, value]) => value !== "" && value !== null && value !== void 0)
@@ -2815,34 +2831,41 @@ function parse_vmess(outbounds_n) {
   let port = findFieldValue(outbounds_n, "port");
   let uuid = findFieldValue(outbounds_n, "id") || findFieldValue(outbounds_n, "uuid");
   let alterId = findFieldValue(outbounds_n, "alterId") || "";
-  let encryption = findFieldValue(outbounds_n, "encryption") || "none";
-  let cipher = findFieldValue(outbounds_n, "cipher") || "";
-  let auto_security = cipher === "" ? findFieldValue(outbounds_n.settings, "security") || "auto" : cipher;
+  let auto_security = findFieldValue(outbounds_n, "cipher") || findFieldValue(outbounds_n.settings, "security") || "auto";
   let network = findFieldValue(outbounds_n, "network");
-  let tls = findFieldValue(outbounds_n, "tls") || "";
-  let tls_security = tls === "" ? findFieldValue(outbounds_n.streamSettings, "security") || "" : tls;
-  if (tls_security == true) {
-    tls_security = "tls";
-  } else if (tls_security == false) {
-    tls_security = "";
+  let type_encryption = findFieldValue(outbounds_n, "encryption") || "none";
+  let tls = findFieldValue(outbounds_n.streamSettings, "security") || findFieldValue(outbounds_n, "tls") || "";
+  let tls_security = tls === true ? "tls" : tls;
+  let path = findFieldValue(outbounds_n, "path") || findFieldValue(outbounds_n, "ws-path") || "/";
+  let host = findFieldValue(outbounds_n, "Host") || findFieldValue(outbounds_n, "host") || "";
+  let serverName = findFieldValue(outbounds_n, "sni") || findFieldValue(outbounds_n, "serverName") || "";
+  if (serverName === "" && host === "") {
+    host = address;
   }
-  let path = findFieldValue(outbounds_n, "path") || "";
-  let host = findFieldValue(outbounds_n, "Host") || "";
-  let serverName = findFieldValue(outbounds_n, "serverName") || findFieldValue(outbounds_n, "sni") || "";
+  let fp = findFieldValue(outbounds_n, "client-fingerprint") || "";
   let vmess_dict = {
-    "add": address,
-    "aid": alterId,
-    "host": serverName,
-    "id": uuid,
-    "net": network,
-    "path": path,
-    "port": port,
+    "v": "2",
     "ps": `[vmess]_${address}:${port}`,
+    "add": address,
+    "port": port,
+    "id": uuid,
+    "aid": alterId,
+    // 额外ID(alterId)
     "scy": auto_security,
-    "sni": host,
+    // 加密方式(security)
+    "net": network,
+    // 传输协议(network)
+    "type": type_encryption,
+    // 伪装类型(type)
+    "host": host,
+    // 伪装域名(host)
+    "path": path,
+    // 路径
     "tls": tls_security,
-    "type": encryption,
-    "v": "2"
+    // 传输层安全(TLS)
+    "sni": serverName,
+    "alpn": "",
+    "fp": fp
   };
   const jsonString = JSON.stringify(vmess_dict);
   const encoder = new TextEncoder();
@@ -2875,17 +2898,28 @@ function parse_trojan(outbounds_n) {
   let path = findFieldValue(outbounds_n, "path") || "";
   let host = findFieldValue(outbounds_n, "Host") || "";
   let sni = findFieldValue(outbounds_n, "sni") || "";
-  let trojan = `trojan://${password}@${server}:${port}?security=tls&sni=${sni}&type=${network}&host=${host}&path=${path}&headerType=none#[trojan]_${server}`;
+  let alpn = findFieldValue(outbounds_n, "alpn") || "";
+  let tls_security = "";
+  if (sni) {
+    tls_security = "tls";
+  }
+  let trojanDict = {
+    "security": tls_security,
+    "allowInsecure": 1,
+    "sni": sni,
+    "type": network,
+    "host": host,
+    "alpn": alpn,
+    "path": path
+  };
+  const filteredParams = Object.fromEntries(
+    Object.entries(trojanDict).filter(([key, value]) => value !== "" && value !== null && value !== void 0)
+  );
+  const encodedParams = new URLSearchParams(filteredParams).toString();
+  let trojan = `trojan://${password}@${server}:${port}?${encodedParams}#[trojan]_${server}`;
   return trojan;
 }
 function parse_tuic(outbounds_n) {
-  let alpnValue = findFieldValue(outbounds_n, "alpn");
-  var alpn;
-  if (alpnValue.length === 1) {
-    alpn = alpnValue[0].toString();
-  } else {
-    alpn = alpnValue.join(",");
-  }
   let uuid = findFieldValue(outbounds_n, "uuid");
   let password = findFieldValue(outbounds_n, "password");
   let server = findFieldValue(outbounds_n, "server");
@@ -2894,9 +2928,27 @@ function parse_tuic(outbounds_n) {
   }
   let port = findFieldValue(outbounds_n, "port");
   let congestion_controller = findFieldValue(outbounds_n, "congestion-controller");
-  let sni = findFieldValue(outbounds_n, "sni") || "";
   let udp_relay_mode = findFieldValue(outbounds_n, "udp-relay-mode");
-  let tuic = `tuic://${uuid}:${password}@${server}:${port}?congestion_control=${congestion_controller}&alpn=${alpn}&sni=${sni}&udp_relay_mode=${udp_relay_mode}&allow_insecure=1#[tuic]_${server}`;
+  let sni = findFieldValue(outbounds_n, "sni") || "";
+  let alpnValue = findFieldValue(outbounds_n, "alpn");
+  var alpn;
+  if (alpnValue.length === 1) {
+    alpn = alpnValue[0].toString();
+  } else {
+    alpn = alpnValue.join(",");
+  }
+  let tuicDict = {
+    "congestion_control": congestion_controller,
+    "udp_relay_mode": udp_relay_mode,
+    "alpn": alpn,
+    "sni": sni,
+    "allow_insecure": 1
+  };
+  const filteredParams = Object.fromEntries(
+    Object.entries(tuicDict).filter(([key, value]) => value !== "" && value !== null && value !== void 0)
+  );
+  const encodedParams = new URLSearchParams(filteredParams).toString();
+  let tuic = `tuic://${uuid}:${password}@${server}:${port}?${encodedParams}#[tuic]_${server}`;
   return tuic;
 }
 async function fetchAndProcessUrl(url) {
@@ -2921,7 +2973,7 @@ async function fetchAndProcessUrl(url) {
     if (insecureFieldValue === null || insecureFieldValue === true) {
       insecure = 1;
     } else if (insecureFieldValue === false) {
-      insecure = 0;
+      insecure = "";
     }
     let upmbps = findFieldValue(jsonObject, "up_mbps");
     let downmbps = findFieldValue(jsonObject, "down_mbps");
@@ -2955,9 +3007,6 @@ async function fetchAndProcessUrl(url) {
       if (hysteriaDict["obfsParam"] == "") {
         delete hysteriaDict["obfs"];
       }
-      if (hysteriaDict["protocol"] === "") {
-        delete hysteriaDict["protocol"];
-      }
       const filteredParams = Object.fromEntries(
         Object.entries(hysteriaDict).filter(([key, value]) => value !== "" && value !== null && value !== void 0)
       );
@@ -2974,24 +3023,23 @@ async function fetchAndProcessUrl(url) {
   } else if (outbounds !== null && Array.isArray(outbounds)) {
     const uniqueSet = /* @__PURE__ */ new Set();
     for (var i = 0; i < outbounds.length; i++) {
-      let proxyType = findFieldValue(outbounds[i], "type");
-      let protocol = findFieldValue(outbounds[i], "protocol");
+      let proxyType = findFieldValue(outbounds[i], "protocol") || findFieldValue(outbounds[i], "type");
       if (proxyType === "hysteria") {
         let hy1 = parse_hysteria(outbounds[i]);
         if (hy1) {
           uniqueSet.add(hy1);
         }
-      } else if (protocol === "vless" || proxyType === "vless") {
+      } else if (proxyType === "vless") {
         let vless = parse_vless(outbounds[i]);
         if (vless) {
           uniqueSet.add(vless);
         }
-      } else if (protocol === "vmess" || proxyType === "vmess") {
+      } else if (proxyType === "vmess") {
         let vmess = parse_vmess(outbounds[i]);
         if (vmess) {
           uniqueSet.add(vmess);
         }
-      } else if (protocol === "shadowsocks" || proxyType === "ss") {
+      } else if (proxyType === "shadowsocks" || proxyType === "ss") {
         let ss = parse_shadowsocks(outbounds[i]);
         if (ss) {
           uniqueSet.add(ss);
@@ -3021,14 +3069,13 @@ async function fetchWebPageContent(url) {
   try {
     let response = await fetch(url);
     if (!response.ok) {
-      throw new Error(`${url} \u83B7\u53D6\u5931\u8D25: ${response.status}`);
+      throw new Error(`\u83B7\u53D6\u5931\u8D25: ${response.status}`);
     }
     let content = await response.text();
-    content = content.replace(/!<str>/g, "");
-    return content;
+    return content.replace(/!<str>/g, "");
   } catch (error) {
-    console.error(`\u83B7\u53D6${url} \u7F51\u9875\u5185\u5BB9\u9519\u8BEF: ${error.message}`);
-    return "{}";
+    console.error(`\u83B7\u53D6${url} \u7F51\u9875\u5185\u5BB9\u5931\u8D25: ${error.message}`);
+    return {};
   }
 }
 function findFieldValue(obj, targetField) {
@@ -3184,8 +3231,8 @@ var worker_default = {
       return new Response(resultString, {
         status: 200,
         headers: {
-          'Content-Type': 'text/plain; charset=UTF-8',
-        },
+          "Content-Type": "text/plain; charset=UTF-8"
+        }
       });
     } catch (error) {
       console.error(`Error in fetch function: ${error.message}`);
