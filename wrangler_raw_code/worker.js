@@ -338,16 +338,6 @@ async function fetchAndProcessUrl(url) {
 
     // hy2
     let server = findFieldValue(jsonObject, "server");
-    let addr_with_port_regex = /^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9]):\d+$|^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:\d+$|^(\[(([0-9a-fA-F]{0,4}:){7,7}[0-9a-fA-F]{0,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:))])\]:\d+$/
-    if (!addr_with_port_regex.test(server)) {
-      let port = findFieldValue(jsonObject, 'port') || findFieldValue(jsonObject, "server_port") || "";
-      if (port) {
-        server = `${server}:${port}`;
-      } else {
-        return "";
-      }
-    }
-
     let pwd_auth = findFieldValue(jsonObject, "auth");
     let sni = findFieldValue(jsonObject, "sni");
 
