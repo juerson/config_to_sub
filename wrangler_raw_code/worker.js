@@ -4,6 +4,9 @@ import yaml from 'js-yaml'; // npm install js-yaml
 
 function parse_hysteria(outbounds_n) {
   let server = findFieldValue(outbounds_n, "server");
+  if (server.startsWith("127.0.0.1")) {
+    return "";
+  }
   let port = findFieldValue(outbounds_n, "server_port") || findFieldValue(outbounds_n, 'port');
 
   let upmbps_str = findFieldValue(outbounds_n, "up_mbps") || findFieldValue(outbounds_n, 'up');
@@ -16,25 +19,14 @@ function parse_hysteria(outbounds_n) {
   let peer = findFieldValue(outbounds_n, "server_name") || findFieldValue(outbounds_n, 'sni') || "";
 
   let protocolValue = findFieldValue(outbounds_n, 'protocol');
-  let protocol = protocolValue === "hysteria" ? "" : protocolValue || "";
+  let protocol = protocolValue !== "hysteria" ? protocolValue : ""
 
   let insecureFieldValue = findFieldValue(outbounds_n, "insecure");
-  let insecure;
-  if (insecureFieldValue === null || insecureFieldValue === true) {
-    insecure = 1
-  } else if (insecureFieldValue === false) {
-    insecure = ""
-  }
+  let insecure = [null, true].includes(insecureFieldValue) ? 1 : "";
 
   let alpnValue = findFieldValue(outbounds_n, "alpn");
-  var alpn;
-  if (alpnValue.length === 1) {
-    // 如果数组只有一个元素，直接获取该元素
-    alpn = alpnValue[0].toString();
-  } else {
-    // 如果数组有多个元素，使用逗号连接
-    alpn = alpnValue.join(',');
-  }
+  let alpn = alpnValue.length === 1 ? alpnValue[0].toString() : alpnValue.join(',');
+
   let hysteriaDict = {
     "upmbps": upmbps,
     "downmbps": downmbps,
@@ -63,9 +55,11 @@ function parse_hy2(outbounds_n) {
   if (server.startsWith("127.0.0.1")) {
     return "";
   }
-
   let port = findFieldValue(outbounds_n, 'port');
-  if (!server.includes(":")) {
+
+  // 排除"domain:port"、"ipv4:port" 或 "ipv6:port" 这三种情况地址的正则表达式
+  let genericAddressRegex = /^(?!.*:\d+$)(?!\[.*\].*:\d+$)/
+  if (genericAddressRegex.test(server)) {
     server = `${server}:${port}`;
   }
 
@@ -81,12 +75,7 @@ function parse_hy2(outbounds_n) {
   let downmbps = parseInt(String(down).replace(/\D/g, ''), 10) || 0;
 
   let insecureFieldValue = findFieldValue(outbounds_n, "insecure");
-  let insecure;
-  if (insecureFieldValue === null || insecureFieldValue === true) {
-    insecure = 1
-  } else if (insecureFieldValue === false) {
-    insecure = ""
-  }
+  let insecure = [null, true].includes(insecureFieldValue) ? 1 : "";
 
   let hy2Dict = {
     "upmbps": upmbps,
@@ -113,7 +102,7 @@ function parse_hy2(outbounds_n) {
 
 function parse_vless(outbounds_n) {
   let address = findFieldValue(outbounds_n, "address") || findFieldValue(outbounds_n, 'server'); // "||" 左边为json，右边是yaml
-  if (address === "127.0.0.1" || address === null) {
+  if (address === "127.0.0.1") {
     return "";
   }
   let port = findFieldValue(outbounds_n, "port");
@@ -132,15 +121,16 @@ function parse_vless(outbounds_n) {
     tls_security = tls === true ? 'tls' || "" : tls;
   }
   let serverName = findFieldValue(outbounds_n, "serverName") || findFieldValue(outbounds_n, 'servername');
-  let fingerprint = findFieldValue(outbounds_n, "fingerprint") || findFieldValue(outbounds_n, 'client-fingerprint');
+  let fp = findFieldValue(outbounds_n, "fingerprint") || findFieldValue(outbounds_n, 'client-fingerprint') || "";
   let public_key = findFieldValue(outbounds_n, 'public-key') || "";
   let short_id = findFieldValue(outbounds_n, 'short-id') || "";
+
   let vlessDict = {
     "encryption": encryption, // 加密方式
     "flow": flow,
     "security": tls_security, // 传输层安全(TLS)
     "sni": serverName,
-    "fp": fingerprint,
+    "fp": fp,
     "pbk": public_key,
     "sid": short_id,
     "type": network, // 传输协议(network)
@@ -148,12 +138,14 @@ function parse_vless(outbounds_n) {
     "path": path,
     "headerType": "none" // 伪装类型
   }
+
   // 过滤掉值为空的键值对
   const filteredParams = Object.fromEntries(
     Object.entries(vlessDict).filter(([key, value]) => value !== '' && value !== null && value !== undefined)
   );
   // 进行 URL 参数编码
   const encodedParams = new URLSearchParams(filteredParams).toString();
+
   let vless = `vless://${uuid}@${address}:${port}?${encodedParams}#[vless]_${address}:${port}`;
 
   return vless;
@@ -189,7 +181,7 @@ function parse_vmess(outbounds_n) {
   if (serverName === "" && host === "") {
     host = address;
   }
-  let fp = findFieldValue(outbounds_n, 'client-fingerprint') || "";
+  let fp = findFieldValue(outbounds_n, 'client-fingerprint') || findFieldValue(outbounds_n, 'fingerprint') || "";
   let vmess_dict = {
     "v": "2",
     "ps": `[vmess]_${address}:${port}`,
@@ -252,17 +244,20 @@ function parse_trojan(outbounds_n) {
   let password = findFieldValue(outbounds_n, 'password');
   let network = findFieldValue(outbounds_n, 'network') || "tcp";
   let path = findFieldValue(outbounds_n, 'path') || "";
-  let host = findFieldValue(outbounds_n, 'Host') || "";
+  let host = findFieldValue(outbounds_n, 'Host') || findFieldValue(outbounds_n, 'host') || "";
   let sni = findFieldValue(outbounds_n, 'sni') || "";
+
+  let fp = findFieldValue(outbounds_n, 'client-fingerprint') || findFieldValue(outbounds_n, 'fingerprint') || "";
   let alpn = findFieldValue(outbounds_n, 'alpn') || ""; // 没有确定字段是否这个名字
   let tls_security = "";
   if (sni) {
-    tls_security = "tls"
+    tls_security = "tls";
   }
   let trojanDict = {
     "security": tls_security,
     "allowInsecure": 1,
     "sni": sni,
+    "fp": fp,
     "type": network,
     "host": host,
     "alpn": alpn,
@@ -333,7 +328,7 @@ async function fetchAndProcessUrl(url) {
     outbounds = findFieldValue(jsonObject, "outbounds");
   } catch (jsonError) {
     let yamlObject = yaml.load(content); // 使用js-yaml库解析yaml
-    if (yamlObject !== null && typeof yamlObject === 'object') {
+    if (yamlObject && typeof yamlObject === 'object') {
       outbounds = findFieldValue(yamlObject, "proxies");
     }
   }
@@ -343,17 +338,21 @@ async function fetchAndProcessUrl(url) {
 
     // hy2
     let server = findFieldValue(jsonObject, "server");
-    let password = findFieldValue(jsonObject, "auth");
+    let addr_with_port_regex = /^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9]):\d+$|^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:\d+$|^(\[(([0-9a-fA-F]{0,4}:){7,7}[0-9a-fA-F]{0,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:))])\]:\d+$/
+    if (!addr_with_port_regex.test(server)) {
+      let port = findFieldValue(jsonObject, 'port') || findFieldValue(jsonObject, "server_port") || "";
+      if (port) {
+        server = `${server}:${port}`;
+      } else {
+        return "";
+      }
+    }
+
+    let pwd_auth = findFieldValue(jsonObject, "auth");
     let sni = findFieldValue(jsonObject, "sni");
 
     let insecureFieldValue = findFieldValue(jsonObject, "insecure");
-
-    let insecure;
-    if (insecureFieldValue === null || insecureFieldValue === true) {
-      insecure = 1;
-    } else if (insecureFieldValue === false) {
-      insecure = "";
-    }
+    let insecure = [null, true].includes(insecureFieldValue) ? 1 : "";
 
     // hy1
     let upmbps = findFieldValue(jsonObject, "up_mbps");
@@ -369,17 +368,17 @@ async function fetchAndProcessUrl(url) {
     // naive
     let proxyFieldValue = findFieldValue(jsonObject, "proxy");
 
-    // 使用正则表达式进行匹配
-    const pattern = /^https:\/\/.*@.*$/;
+    // 使用正则表达式进行匹配naive配置文件中proxy中的值
+    const pattern = /^https:\/\/.*@.*$/
     const isMatch = pattern.test(proxyFieldValue);
 
-    if (server !== null && password !== null) {
+    if (server && pwd_auth) {
       // 判断是hy2
 
-      let hy2 = `hy2://${password}@${server}?insecure=${insecure}&sni=${sni}#[hy2]_${server}`
+      let hy2 = `hy2://${pwd_auth}@${server}?insecure=${insecure}&sni=${sni}#[hy2]_${server}`
 
       return hy2
-    } else if (server !== null && upmbps !== null && downmbps !== null && auth !== null && alpn !== null) {
+    } else if (server && auth && alpn && upmbps !== null && downmbps !== null) {
       // 判断是hy1
 
       let hysteriaDict = {
@@ -396,7 +395,7 @@ async function fetchAndProcessUrl(url) {
         "recv_window_conn": recv_window_conn
       }
       // 没有对应的值，就从hysteriaDict中删除
-      if (hysteriaDict["obfsParam"] == "") {
+      if (hysteriaDict["obfsParam"] === "") {
         delete hysteriaDict["obfs"];
       }
       // 过滤掉值为空的键值对
@@ -405,11 +404,11 @@ async function fetchAndProcessUrl(url) {
       );
       // 进行 URL 参数编码
       const encodedParams = new URLSearchParams(filteredParams).toString();
-      // 拼接链接
+
       let hy1 = `hysteria://${server}?${encodedParams}#[hysteria]_${server}`;
 
       return hy1
-    } else if (proxyFieldValue !== null && isMatch && (typeof proxyFieldValue === "string")) {
+    } else if (proxyFieldValue && isMatch && (typeof proxyFieldValue === "string")) {
       // 判断是naive
 
       // 从右侧找到 ":" 和 "@" 的索引
@@ -422,20 +421,36 @@ async function fetchAndProcessUrl(url) {
       return naive
     }
     // 以下为同一个json或yaml文件中，可能含多个节点
-  } else if (outbounds !== null && Array.isArray(outbounds)) {
+  } else if (outbounds && Array.isArray(outbounds)) {
     /** 判断该json数据可能有多个节点 */
 
     // 创建一个空的 Set，存储可能是多个节点的链接
     const uniqueSet = new Set();
+
+    let allProxyType = ["hysteria", "hysteria1", "hy1", "hysteria2", "hy2", "vless", "vmess", "trojan", "ss", "shadowsocks", "tuic"]
     // 遍历数组中的节点
     for (var i = 0; i < outbounds.length; i++) {
-      // 左边protocol为json、右边type为yaml
-      let proxyType = findFieldValue(outbounds[i], "protocol") || findFieldValue(outbounds[i], "type");
+      let proxyType = findFieldValue(outbounds[i], "protocol");
+      if (!allProxyType.includes(proxyType)) {
+        proxyType = findFieldValue(outbounds[i], "type")
+      }
       // 检查到是hysteria类型的节点
-      if (proxyType === "hysteria") {
+      if (["hysteria", "hysteria1", "hy1"].includes(proxyType)) {
         let hy1 = parse_hysteria(outbounds[i]);
         if (hy1) {
           uniqueSet.add(hy1);
+        }
+        // 检查到是hy2类型的节点
+      } else if (["hy2", "hysteria2"].includes(proxyType)) {
+        let hy2 = parse_hy2(outbounds[i]);
+        if (hy2) {
+          uniqueSet.add(hy2);
+        }
+        // 检查到是shadowsocks类型的节点
+      } else if (["ss", "shadowsocks"].includes(proxyType)) {
+        let ss = parse_shadowsocks(outbounds[i]);
+        if (ss) {
+          uniqueSet.add(ss);
         }
         // 检查到是vless类型的节点
       } else if (proxyType === "vless") {
@@ -449,23 +464,11 @@ async function fetchAndProcessUrl(url) {
         if (vmess) {
           uniqueSet.add(vmess)
         }
-        // 检查到是shadowsocks类型的节点
-      } else if (proxyType === "shadowsocks" || proxyType === 'ss') {
-        let ss = parse_shadowsocks(outbounds[i]);
-        if (ss) {
-          uniqueSet.add(ss);
-        }
         // 检查到是trojan类型的节点
       } else if (proxyType === "trojan") {
         let trojan = parse_trojan(outbounds[i]);
         if (trojan) {
           uniqueSet.add(trojan);
-        }
-        // 检查到是hy2类型的节点
-      } else if (proxyType === "hysteria2" || proxyType === "hy2") {
-        let hy2 = parse_hy2(outbounds[i]);
-        if (hy2) {
-          uniqueSet.add(hy2);
         }
         // 检查到是tuic类型的节点
       } else if (proxyType === "tuic") {
@@ -508,9 +511,9 @@ async function fetchWebPageContent(url) {
 function findFieldValue(obj, targetField) {
   for (const key in obj) {
     if (obj.hasOwnProperty(key)) {
-      if (key == targetField) {
+      if (key === targetField) {
         return obj[key];
-      } else if (typeof obj[key] == 'object') {
+      } else if (typeof obj[key] === 'object') {
         const result = findFieldValue(obj[key], targetField);
         if (result != undefined) {
           return result;
@@ -526,7 +529,7 @@ async function processUrls(targetUrls) {
   const results = [];
 
   // 并发执行的最大任务数量
-  const maxConcurrency = 2; // 你可以根据需求调整这个数值
+  const maxConcurrency = 3; // 你可以根据需求调整这个数值
 
   // 辅助函数，限制并发执行的异步任务数量
   const asyncPool = async (poolLimit, array, iteratorFn) => {
@@ -569,7 +572,7 @@ async function processUrls(targetUrls) {
   return results;
 }
 
-// 定义一个包含多个URL的数组(顺序随意，json、yaml都可以)
+// 定义一个包含多个URL的数组(顺序随意，是json、yaml数据都可以，前提是抓取网页内容不会抛出“internal error”错误)
 const targetUrls = [
   // hysteria
   'https://www.gitlabip.xyz/Alvin9999/pac2/master/hysteria/1/config.json',
@@ -651,6 +654,8 @@ const targetUrls = [
   'https://www.gitlabip.xyz/Alvin9999/pac2/master/quick/3/config.yaml',
   'https://www.githubip.xyz/Alvin9999/pac2/master/quick/4/config.yaml',
   'https://fastly.jsdelivr.net/gh/Alvin9999/pac2@latest/quick/4/config.yaml',
+  // 其它
+  'https://raw.githubusercontent.com/aiboboxx/clashfree/main/clash.yml',
 ];
 
 // 程序总入口
@@ -658,13 +663,13 @@ export default {
   async fetch(request, env, ctx) {
     try {
       // 调用函数并处理结果
-      const resultsArray = await processUrls(targetUrls);
+      let resultsArray = await processUrls(targetUrls);
 
       // 使用Set数据结构的特性去重（再次去重）
-      const uniqueStrings = [...new Set(resultsArray)];
+      let uniqueStrings = [...new Set(resultsArray)];
 
       // 排序
-      const sortedArray = uniqueStrings.sort((a, b) => {
+      let sortedArray = uniqueStrings.sort((a, b) => {
         // 先按字母顺序排序
         const compareByLetters = a.localeCompare(b);
         // 如果字母相同，则按数字大小排序
@@ -683,7 +688,7 @@ export default {
       });
 
       // 将结果数组拼接成一个字符串，每个结果之间添加换行符
-      const resultString = sortedArray.join('\n');
+      let resultString = sortedArray.join('\n');
 
       // 在这里可以对内容进行处理
       return new Response(resultString, {
