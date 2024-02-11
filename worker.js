@@ -2697,6 +2697,9 @@ var js_yaml_default = jsYaml;
 // src/worker.js
 function parse_hysteria(outbounds_n) {
   let server = findFieldValue(outbounds_n, "server");
+  if (server.startsWith("127.0.0.1")) {
+    return "";
+  }
   let port = findFieldValue(outbounds_n, "server_port") || findFieldValue(outbounds_n, "port");
   let upmbps_str = findFieldValue(outbounds_n, "up_mbps") || findFieldValue(outbounds_n, "up");
   let downmbps_str = findFieldValue(outbounds_n, "down_mbps") || findFieldValue(outbounds_n, "down");
@@ -2705,20 +2708,15 @@ function parse_hysteria(outbounds_n) {
   let auth = findFieldValue(outbounds_n, "auth_str") || findFieldValue(outbounds_n, "auth-str");
   let peer = findFieldValue(outbounds_n, "server_name") || findFieldValue(outbounds_n, "sni") || "";
   let protocolValue = findFieldValue(outbounds_n, "protocol");
-  let protocol = protocolValue === "hysteria" ? "" : protocolValue || "";
+  let protocol = protocolValue !== "hysteria" ? protocolValue : "";
   let insecureFieldValue = findFieldValue(outbounds_n, "insecure");
-  let insecure;
-  if (insecureFieldValue === null || insecureFieldValue === true) {
-    insecure = 1;
-  } else if (insecureFieldValue === false) {
-    insecure = "";
-  }
+  let insecure = [null, true].includes(insecureFieldValue) ? 1 : "";
   let alpnValue = findFieldValue(outbounds_n, "alpn");
-  var alpn;
-  if (alpnValue.length === 1) {
-    alpn = alpnValue[0].toString();
+  let alpn;
+  if (typeof alpnValue === "string") {
+    alpn = alpnValue;
   } else {
-    alpn = alpnValue.join(",");
+    alpn = alpnValue.length === 1 ? alpnValue[0].toString() : alpnValue.join(",");
   }
   let hysteriaDict = {
     "upmbps": upmbps,
@@ -2742,24 +2740,20 @@ function parse_hy2(outbounds_n) {
     return "";
   }
   let port = findFieldValue(outbounds_n, "port");
-  if (!server.includes(":")) {
+  let genericAddressRegex = /^(?!.*:\d+$)(?!\[.*\].*:\d+$)/;
+  if (genericAddressRegex.test(server)) {
     server = `${server}:${port}`;
   }
-  let password = findFieldValue(outbounds_n, "password");
+  let password = findFieldValue(outbounds_n, "password") || findFieldValue(outbounds_n, "auth");
   let obfs = findFieldValue(outbounds_n, "obfs") || "";
   let obfs_password = findFieldValue(outbounds_n, "obfs-password") || "";
   let sni = findFieldValue(outbounds_n, "sni") || "";
-  let up = findFieldValue(outbounds_n, "up") || "0";
-  let down = findFieldValue(outbounds_n, "down") || "0";
+  let up = findFieldValue(outbounds_n, "up") || "80";
+  let down = findFieldValue(outbounds_n, "down") || "100";
   let upmbps = parseInt(String(up).replace(/\D/g, ""), 10) || 0;
   let downmbps = parseInt(String(down).replace(/\D/g, ""), 10) || 0;
   let insecureFieldValue = findFieldValue(outbounds_n, "insecure");
-  let insecure;
-  if (insecureFieldValue === null || insecureFieldValue === true) {
-    insecure = 1;
-  } else if (insecureFieldValue === false) {
-    insecure = "";
-  }
+  let insecure = [null, true].includes(insecureFieldValue) ? 1 : "";
   let hy2Dict = {
     "upmbps": upmbps,
     "downmbps": downmbps,
@@ -2777,7 +2771,7 @@ function parse_hy2(outbounds_n) {
 }
 function parse_vless(outbounds_n) {
   let address = findFieldValue(outbounds_n, "address") || findFieldValue(outbounds_n, "server");
-  if (address === "127.0.0.1" || address === null) {
+  if (address === "127.0.0.1") {
     return "";
   }
   let port = findFieldValue(outbounds_n, "port");
@@ -2785,19 +2779,33 @@ function parse_vless(outbounds_n) {
   let encryption = findFieldValue(outbounds_n, "encryption") || "none";
   let flow = findFieldValue(outbounds_n, "flow") || "";
   let network = findFieldValue(outbounds_n, "network");
-  let host = findFieldValue(outbounds_n, "Host") || findFieldValue(outbounds_n, "host");
+  let host = findFieldValue(outbounds_n, "Host") || findFieldValue(outbounds_n, "host") || "";
   let path = findFieldValue(outbounds_n, "path") || "";
+  let public_key = findFieldValue(outbounds_n, "public-key") || findFieldValue(outbounds_n, "publicKey") || "";
+  let short_id = findFieldValue(outbounds_n, "short-id") || findFieldValue(outbounds_n, "shortId") || "";
+  let serverName = findFieldValue(outbounds_n, "serverName") || findFieldValue(outbounds_n, "servername") || "";
+  if (host === "" && serverName === "") {
+    host = address;
+  } else if (host === "" && serverName !== "") {
+    host = serverName;
+  }
   let tls_security;
-  if (findFieldValue(outbounds_n, "reality-opts")) {
+  if (public_key !== "") {
     tls_security = "reality";
   } else {
     let tls = findFieldValue(outbounds_n.streamSettings, "security") || findFieldValue(outbounds_n, "tls") || "";
-    tls_security = tls === true ? "tls" : tls;
+    if (tls === "none") {
+      tls_security = "";
+    } else if (tls === true) {
+      tls_security = "tls";
+    } else {
+      tls_security = "";
+    }
   }
-  let serverName = findFieldValue(outbounds_n, "serverName") || findFieldValue(outbounds_n, "servername");
-  let fingerprint = findFieldValue(outbounds_n, "fingerprint") || findFieldValue(outbounds_n, "client-fingerprint");
-  let public_key = findFieldValue(outbounds_n, "public-key") || "";
-  let short_id = findFieldValue(outbounds_n, "short-id") || "";
+  if (tls_security === "" && network === "ws" && serverName !== "") {
+    tls_security = "tls";
+  }
+  let fp = findFieldValue(outbounds_n, "fingerprint") || findFieldValue(outbounds_n, "client-fingerprint") || "";
   let vlessDict = {
     "encryption": encryption,
     // 加密方式
@@ -2805,7 +2813,7 @@ function parse_vless(outbounds_n) {
     "security": tls_security,
     // 传输层安全(TLS)
     "sni": serverName,
-    "fp": fingerprint,
+    "fp": fp,
     "pbk": public_key,
     "sid": short_id,
     "type": network,
@@ -2813,8 +2821,8 @@ function parse_vless(outbounds_n) {
     "host": host,
     // 伪装域名(host)
     "path": path,
-    "headerType": "none"
-    // 伪装类型
+    "headerType": ""
+    // 伪装类型(type)
   };
   const filteredParams = Object.fromEntries(
     Object.entries(vlessDict).filter(([key, value]) => value !== "" && value !== null && value !== void 0)
@@ -2842,7 +2850,7 @@ function parse_vmess(outbounds_n) {
   if (serverName === "" && host === "") {
     host = address;
   }
-  let fp = findFieldValue(outbounds_n, "client-fingerprint") || "";
+  let fp = findFieldValue(outbounds_n, "client-fingerprint") || findFieldValue(outbounds_n, "fingerprint") || "";
   let vmess_dict = {
     "v": "2",
     "ps": `[vmess]_${address}:${port}`,
@@ -2889,15 +2897,16 @@ function parse_shadowsocks(outbounds_n) {
 }
 function parse_trojan(outbounds_n) {
   let server = findFieldValue(outbounds_n, "server");
-  if (server === "127.0.0.1") {
+  if (server.startsWith("127.0.0.1")) {
     return "";
   }
   let port = findFieldValue(outbounds_n, "port");
   let password = findFieldValue(outbounds_n, "password");
   let network = findFieldValue(outbounds_n, "network") || "tcp";
   let path = findFieldValue(outbounds_n, "path") || "";
-  let host = findFieldValue(outbounds_n, "Host") || "";
+  let host = findFieldValue(outbounds_n, "Host") || findFieldValue(outbounds_n, "host") || "";
   let sni = findFieldValue(outbounds_n, "sni") || "";
+  let fp = findFieldValue(outbounds_n, "client-fingerprint") || findFieldValue(outbounds_n, "fingerprint") || "";
   let alpn = findFieldValue(outbounds_n, "alpn") || "";
   let tls_security = "";
   if (sni) {
@@ -2907,6 +2916,7 @@ function parse_trojan(outbounds_n) {
     "security": tls_security,
     "allowInsecure": 1,
     "sni": sni,
+    "fp": fp,
     "type": network,
     "host": host,
     "alpn": alpn,
@@ -2960,21 +2970,16 @@ async function fetchAndProcessUrl(url) {
     outbounds = findFieldValue(jsonObject, "outbounds");
   } catch (jsonError) {
     let yamlObject = js_yaml_default.load(content);
-    if (yamlObject !== null && typeof yamlObject === "object") {
+    if (yamlObject && typeof yamlObject === "object") {
       outbounds = findFieldValue(yamlObject, "proxies");
     }
   }
   if (outbounds === null && jsonObject) {
     let server = findFieldValue(jsonObject, "server");
-    let password = findFieldValue(jsonObject, "auth");
+    let pwd_auth = findFieldValue(jsonObject, "auth");
     let sni = findFieldValue(jsonObject, "sni");
     let insecureFieldValue = findFieldValue(jsonObject, "insecure");
-    let insecure;
-    if (insecureFieldValue === null || insecureFieldValue === true) {
-      insecure = 1;
-    } else if (insecureFieldValue === false) {
-      insecure = "";
-    }
+    let insecure = [null, true].includes(insecureFieldValue) ? 1 : "";
     let upmbps = findFieldValue(jsonObject, "up_mbps");
     let downmbps = findFieldValue(jsonObject, "down_mbps");
     let obfsParam = findFieldValue(jsonObject, "obfs") || "";
@@ -2987,10 +2992,10 @@ async function fetchAndProcessUrl(url) {
     let proxyFieldValue = findFieldValue(jsonObject, "proxy");
     const pattern = /^https:\/\/.*@.*$/;
     const isMatch = pattern.test(proxyFieldValue);
-    if (server !== null && password !== null) {
-      let hy2 = `hy2://${password}@${server}?insecure=${insecure}&sni=${sni}#[hy2]_${server}`;
+    if (server && pwd_auth) {
+      let hy2 = `hy2://${pwd_auth}@${server}?insecure=${insecure}&sni=${sni}#[hy2]_${server}`;
       return hy2;
-    } else if (server !== null && upmbps !== null && downmbps !== null && auth !== null && alpn !== null) {
+    } else if (server && auth && alpn && upmbps !== null && downmbps !== null) {
       let hysteriaDict = {
         "upmbps": upmbps,
         "downmbps": downmbps,
@@ -3004,7 +3009,7 @@ async function fetchAndProcessUrl(url) {
         "recv_window": recv_window,
         "recv_window_conn": recv_window_conn
       };
-      if (hysteriaDict["obfsParam"] == "") {
+      if (hysteriaDict["obfsParam"] === "") {
         delete hysteriaDict["obfs"];
       }
       const filteredParams = Object.fromEntries(
@@ -3013,21 +3018,35 @@ async function fetchAndProcessUrl(url) {
       const encodedParams = new URLSearchParams(filteredParams).toString();
       let hy1 = `hysteria://${server}?${encodedParams}#[hysteria]_${server}`;
       return hy1;
-    } else if (proxyFieldValue !== null && isMatch && typeof proxyFieldValue === "string") {
+    } else if (proxyFieldValue && isMatch && typeof proxyFieldValue === "string") {
       const colonIndex = proxyFieldValue.lastIndexOf(":");
       const atIndex = proxyFieldValue.lastIndexOf("@");
       const extractedContent = proxyFieldValue.substring(atIndex + 1, colonIndex);
       let naive = `naive+${proxyFieldValue}#[naive]_${extractedContent}`;
       return naive;
     }
-  } else if (outbounds !== null && Array.isArray(outbounds)) {
+  } else if (outbounds && Array.isArray(outbounds)) {
     const uniqueSet = /* @__PURE__ */ new Set();
+    let allProxyType = ["hysteria", "hysteria1", "hy1", "hysteria2", "hy2", "vless", "vmess", "trojan", "ss", "shadowsocks", "tuic"];
     for (var i = 0; i < outbounds.length; i++) {
-      let proxyType = findFieldValue(outbounds[i], "protocol") || findFieldValue(outbounds[i], "type");
-      if (proxyType === "hysteria") {
+      let proxyType = findFieldValue(outbounds[i], "protocol");
+      if (!allProxyType.includes(proxyType)) {
+        proxyType = findFieldValue(outbounds[i], "type");
+      }
+      if (["hysteria", "hysteria1", "hy1"].includes(proxyType)) {
         let hy1 = parse_hysteria(outbounds[i]);
         if (hy1) {
           uniqueSet.add(hy1);
+        }
+      } else if (["hy2", "hysteria2"].includes(proxyType)) {
+        let hy2 = parse_hy2(outbounds[i]);
+        if (hy2) {
+          uniqueSet.add(hy2);
+        }
+      } else if (["ss", "shadowsocks"].includes(proxyType)) {
+        let ss = parse_shadowsocks(outbounds[i]);
+        if (ss) {
+          uniqueSet.add(ss);
         }
       } else if (proxyType === "vless") {
         let vless = parse_vless(outbounds[i]);
@@ -3039,20 +3058,10 @@ async function fetchAndProcessUrl(url) {
         if (vmess) {
           uniqueSet.add(vmess);
         }
-      } else if (proxyType === "shadowsocks" || proxyType === "ss") {
-        let ss = parse_shadowsocks(outbounds[i]);
-        if (ss) {
-          uniqueSet.add(ss);
-        }
       } else if (proxyType === "trojan") {
         let trojan = parse_trojan(outbounds[i]);
         if (trojan) {
           uniqueSet.add(trojan);
-        }
-      } else if (proxyType === "hysteria2" || proxyType === "hy2") {
-        let hy2 = parse_hy2(outbounds[i]);
-        if (hy2) {
-          uniqueSet.add(hy2);
         }
       } else if (proxyType === "tuic") {
         let tuic = parse_tuic(outbounds[i]);
@@ -3081,9 +3090,9 @@ async function fetchWebPageContent(url) {
 function findFieldValue(obj, targetField) {
   for (const key in obj) {
     if (obj.hasOwnProperty(key)) {
-      if (key == targetField) {
+      if (key === targetField) {
         return obj[key];
-      } else if (typeof obj[key] == "object") {
+      } else if (typeof obj[key] === "object") {
         const result = findFieldValue(obj[key], targetField);
         if (result != void 0) {
           return result;
@@ -3095,7 +3104,7 @@ function findFieldValue(obj, targetField) {
 }
 async function processUrls(targetUrls2) {
   const results = [];
-  const maxConcurrency = 2;
+  const maxConcurrency = 3;
   const asyncPool = async (poolLimit, array, iteratorFn) => {
     const results2 = [];
     const executing = [];
@@ -3207,14 +3216,16 @@ var targetUrls = [
   "https://gitlab.com/free9999/ipupdate/-/raw/master/quick/3/config.yaml",
   "https://www.gitlabip.xyz/Alvin9999/pac2/master/quick/3/config.yaml",
   "https://www.githubip.xyz/Alvin9999/pac2/master/quick/4/config.yaml",
-  "https://fastly.jsdelivr.net/gh/Alvin9999/pac2@latest/quick/4/config.yaml"
+  "https://fastly.jsdelivr.net/gh/Alvin9999/pac2@latest/quick/4/config.yaml",
+  // 其它
+  "https://raw.githubusercontent.com/aiboboxx/clashfree/main/clash.yml"
 ];
 var worker_default = {
   async fetch(request, env, ctx) {
     try {
-      const resultsArray = await processUrls(targetUrls);
-      const uniqueStrings = [...new Set(resultsArray)];
-      const sortedArray = uniqueStrings.sort((a, b) => {
+      let resultsArray = await processUrls(targetUrls);
+      let uniqueStrings = [...new Set(resultsArray)];
+      let sortedArray = uniqueStrings.sort((a, b) => {
         const compareByLetters = a.localeCompare(b);
         if (compareByLetters === 0) {
           const numA = parseInt(a, 10) || 0;
@@ -3227,7 +3238,7 @@ var worker_default = {
         }
         return compareByLetters;
       });
-      const resultString = sortedArray.join("\n");
+      let resultString = btoa(sortedArray.join("\n"));
       return new Response(resultString, {
         status: 200,
         headers: {
