@@ -539,6 +539,7 @@ async function fetchAndProcessUrl(url) {
  * 顺序随意，json、yaml数据都可以。
  * 不能太多，容易出现"Error: Too many subrequests"错误，
  * 这里已经剔除重复内容的url
+ * 使用这个工具可以粗略去重：https://github.com/juerson/compare_web_contents
  */
 const targetUrls = [
 	// hysteria
