@@ -375,7 +375,7 @@ async function fetchWebPageContent(url) {
 	}
 }
 
-// ---------------------------------------- 抓取网页并返回节点的分享链接 --------------------------------------
+// ---------------------------------- 去抓取网页、处理节点，返回节点的分享链接 ----------------------------------
 
 async function fetchAndProcessUrl(url) {
 	const content = await fetchWebPageContent(url);
