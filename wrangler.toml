@@ -1,0 +1,4 @@
+name = "worker-bitter-boat-a8af"
+main = "src/worker.js"
+compatibility_date = "2023-12-18"
+workers_dev = true
