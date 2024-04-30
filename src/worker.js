@@ -1,6 +1,6 @@
 import yaml from 'js-yaml'; // npm install js-yaml
 
-// ------------------------------------------ 解析和构建 hysteria节点 ---------------------------------------
+// ----------------------------------------- 解析和构建 hysteria 节点 ---------------------------------------
 
 function parse_hysteria(outbounds_n) {
 	let server = findFieldValue(outbounds_n, "server") || "";
@@ -54,7 +54,7 @@ function parse_hysteria(outbounds_n) {
 	return hy1;
 }
 
-// ------------------------------------------- 解析和构建 hy2节点 -------------------------------------------
+// ------------------------------------------ 解析和构建 hy2 节点 -------------------------------------------
 
 function parse_hy2(outbounds_n) {
 	let server = findFieldValue(outbounds_n, 'server') || "";
@@ -104,7 +104,7 @@ function parse_hy2(outbounds_n) {
 	return hy2;
 }
 
-// ------------------------------------------ 解析和构建 vless节点 ------------------------------------------
+// ----------------------------------------- 解析和构建 vless 节点 ------------------------------------------
 
 function parse_vless(outbounds_n) {
 	let address = findFieldValue(outbounds_n, "address") || findFieldValue(outbounds_n, 'server') || "";
@@ -172,7 +172,8 @@ function parse_vless(outbounds_n) {
 	return vless;
 }
 
-// ------------------------------------------ 解析和构建 vmess节点 ------------------------------------------
+// ----------------------------------------- 解析和构建 vmess 节点 ------------------------------------------
+
 function parse_vmess(outbounds_n) {
 	let address = findFieldValue(outbounds_n, "address") || findFieldValue(outbounds_n, 'server') || "";
 	if (address === "127.0.0.1" || address === "") {
@@ -234,7 +235,7 @@ function parse_vmess(outbounds_n) {
 	return vmess;
 }
 
-// ---------------------------------------- 解析和构建 shadowsocks节点 --------------------------------------
+// -------------------------------------- 解析和构建 shadowsocks 节点 ---------------------------------------
 
 function parse_shadowsocks(outbounds_n) {
 	let address = findFieldValue(outbounds_n, 'address') || findFieldValue(outbounds_n, 'server') || "";
@@ -253,7 +254,7 @@ function parse_shadowsocks(outbounds_n) {
 	return ss;
 }
 
-// ----------------------------------------- 解析和构建 trojan节点 ------------------------------------------
+// ----------------------------------------- 解析和构建 trojan 节点 -----------------------------------------
 
 function parse_trojan(outbounds_n) {
 	let server = findFieldValue(outbounds_n, "server") || "";
@@ -296,7 +297,7 @@ function parse_trojan(outbounds_n) {
 	return trojan;
 }
 
-// ------------------------------------------ 解析和构建 tuic节点 -------------------------------------------
+// ------------------------------------------ 解析和构建 tuic 节点 ------------------------------------------
 
 function parse_tuic(outbounds_n) {
 	let uuid = findFieldValue(outbounds_n, 'uuid');
@@ -374,7 +375,7 @@ async function fetchWebPageContent(url) {
 	}
 }
 
-// --------------------------------------- 抓取网页并返回节点的分享链接 --------------------------------------
+// ---------------------------------------- 抓取网页并返回节点的分享链接 --------------------------------------
 
 async function fetchAndProcessUrl(url) {
 	const content = await fetchWebPageContent(url);
@@ -536,7 +537,8 @@ async function fetchAndProcessUrl(url) {
 /**
  * 要抓取的网页，目标urls集
  * 顺序随意，json、yaml数据都可以。
- * 不能太多，容易出现"Error: Too many subrequests"错误，这里已经剔除重复内容的url
+ * 不能太多，容易出现"Error: Too many subrequests"错误，
+ * 这里已经剔除重复内容的url
  */
 const targetUrls = [
 	// hysteria
@@ -588,7 +590,7 @@ const targetUrls = [
 	'https://raw.githubusercontent.com/aiboboxx/clashfree/main/clash.yml',
 ];
 
-// ---------------------------------------- 操作targetUrls和节点的入口 --------------------------------------
+// --------------------------------------- 操作targetUrls和构建节点的入口 ------------------------------------
 
 async function processUrls(targetUrls) {
 	const results = [];
