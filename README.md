@@ -35,6 +35,6 @@
 #### 4、获取到的节点太少
 
 在剔除重复节点的情况下，获取到的节点数 **少于** 配置文件中的**实际节点数**，原因：
-- 1、被 Cloudflare 屏蔽了，特别是 `trojan` 的节点根本没有，在本地电脑开发测试中，能获取 `trojan` 的节点，部署到 Cloudflare 中，可以能是 `trojan` （木马）这个单词的含义而被屏蔽。
+- 1、被 Cloudflare 屏蔽了，特别是 `trojan` 的节点根本没有，在本地电脑开发测试中，能获取 `trojan` 的节点，部署到 Cloudflare 中，可以能是 `trojan` （木马）这个单词的含义而被屏蔽。好像不是被cloudflare屏蔽，有时能获取trojan的节点。
 - 2、出现没有检查到的代码 bug ，导致配置文件转换为分享的链接失败，亦或者不支持这个节点转换为分享链接。
 - 3、 因为`_worker.js` 第 3105 行 `targetUrls` 的链接太多了，出现 `Error: Too many subrequests` 错误，只处理到没有报 `Error: Too many subrequests` 错误之前的代理节点，导致获取到节点太少。
