@@ -2891,7 +2891,7 @@ function parse_shadowsocks(outbounds_n) {
   let method = findFieldValue(outbounds_n, "method") || findFieldValue(outbounds_n, "cipher");
   let password = findFieldValue(outbounds_n, "password");
   let method_with_password = `${method}:${password}`;
-  let base64EncodedString = btoa(method_with_password);
+  let base64EncodedString = utf8ToBase64(method_with_password);
   let ss = `ss://${base64EncodedString}@${address}:${port}#[ss]_${address}`;
   return ss;
 }
@@ -3101,6 +3101,12 @@ async function fetchAndProcessUrl(url) {
     const uniqueArray = Array.from(uniqueSet);
     return uniqueArray;
   }
+}
+function utf8ToBase64(str2) {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(str2);
+  const base64 = btoa(String.fromCharCode(...new Uint8Array(data)));
+  return base64;
 }
 var targetUrls = [
   // hysteria

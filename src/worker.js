@@ -247,7 +247,7 @@ function parse_shadowsocks(outbounds_n) {
 	let method = findFieldValue(outbounds_n, 'method') || findFieldValue(outbounds_n, 'cipher');
 	let password = findFieldValue(outbounds_n, 'password');
 	let method_with_password = `${method}:${password}`;
-	let base64EncodedString = btoa(method_with_password);
+	let base64EncodedString = utf8ToBase64(method_with_password);
 
 	let ss = `ss://${base64EncodedString}@${address}:${port}#[ss]_${address}`;
 
@@ -530,6 +530,14 @@ async function fetchAndProcessUrl(url) {
 
 		return uniqueArray;
 	}
+}
+
+// 将UTF-8字符串转换为Base64编码
+function utf8ToBase64(str) {
+	const encoder = new TextEncoder();
+	const data = encoder.encode(str);
+	const base64 = btoa(String.fromCharCode(...new Uint8Array(data)));
+	return base64;
 }
 
 // -------------------------------------------- 要抓取的网页链接 --------------------------------------------
