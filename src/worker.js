@@ -11,8 +11,8 @@ function parse_hysteria(outbounds_n) {
 
 	let upmbps_str = findFieldValue(outbounds_n, "up_mbps") || findFieldValue(outbounds_n, 'up');
 	let downmbps_str = findFieldValue(outbounds_n, "down_mbps") || findFieldValue(outbounds_n, 'down');
-	
-  // 提取字符串中的数字，然后转换为数字类型
+
+	// 提取字符串中的数字，然后转换为数字类型
 	let upmbps = parseInt(String(upmbps_str).replace(/\D/g, ''), 10) || 0;
 	let downmbps = parseInt(String(downmbps_str).replace(/\D/g, ''), 10) || 0;
 
@@ -224,8 +224,8 @@ function parse_vmess(outbounds_n) {
 	const jsonString = JSON.stringify(vmess_dict);
 
 	/*
-	  由于btoa主要用于处理 Latin-1 字符串，如果字符串包含非 Latin-1 字符（比如 Unicode 字符），
-	  要编码成Base64字符串，就使用 TextEncoder 和 Uint8Array。
+		由于btoa主要用于处理 Latin-1 字符串，如果字符串包含非 Latin-1 字符（比如 Unicode 字符），
+		要编码成Base64字符串，就使用 TextEncoder 和 Uint8Array。
 	*/
 	const encoder = new TextEncoder();
 	const uint8Array = encoder.encode(jsonString);
@@ -543,59 +543,33 @@ function utf8ToBase64(str) {
 // -------------------------------------------- 要抓取的网页链接 --------------------------------------------
 
 /**
- * 要抓取的网页，目标urls集
- * 顺序随意，json、yaml数据都可以。
- * 不能太多，容易出现"Error: Too many subrequests"错误，
- * 这里已经剔除重复内容的url
- * 使用这个工具可以粗略去重：https://github.com/juerson/compare_web_contents
+ * 要抓取的网页，目标urls集，顺序随意，json、yaml数据都可以
+ * 订阅地址的链接不能太多，容易出现"Error: Too many subrequests"错误，尽量保持在30条链接左右
+ *
+ * https://github.com/juerson/subscription_helper
+ * 使用这个工具可以对订阅链接的内容比较，找出内容互不相同的链接，内容相同就选择其中的一个链接
  */
 const targetUrls = [
-	// hysteria
-	'https://gitlab.com/free9999/ipupdate/-/raw/master/hysteria/config.json',
-	'https://www.githubip.xyz/Alvin9999/pac2/master/hysteria/config.json',
-	'https://www.gitlabip.xyz/Alvin9999/pac2/master/hysteria/13/config.json',
-	'https://gitlab.com/free9999/ipupdate/-/raw/master/hysteria/2/config.json',
-	// hysteria2
-	'https://www.gitlabip.xyz/Alvin9999/pac2/master/hysteria2/1/config.json',
-	'https://www.githubip.xyz/Alvin9999/pac2/master/hysteria2/config.json',
-	'https://fastly.jsdelivr.net/gh/Alvin9999/pac2@latest/hysteria2/config.json',
-	'https://www.gitlabip.xyz/Alvin9999/pac2/master/hysteria2/13/config.json',
-	'https://fastly.jsdelivr.net/gh/Alvin9999/pac2@latest/hysteria2/2/config.json',
-	// naiveproxy
-	'https://www.gitlabip.xyz/Alvin9999/PAC/master/naiveproxy/1/config.json',
-	'https://www.githubip.xyz/Alvin9999/PAC/master/naiveproxy/config.json',
-	// singbox
-	'https://gitlab.com/free9999/ipupdate/-/raw/master/singbox/config.json',
-	// xray
-	'https://gitlab.com/free9999/ipupdate/-/raw/master/xray/config.json',
-	'https://www.githubip.xyz/Alvin9999/pac2/master/xray/config.json',
-	'https://www.gitlabip.xyz/Alvin9999/pac2/master/xray/3/config.json',
-	'https://gitlab.com/free9999/ipupdate/-/raw/master/xray/2/config.json',
-	// clash.meta
-	'https://www.githubip.xyz/Alvin9999/pac2/master/clash.meta/config.yaml',
-	'https://www.gitlabip.xyz/Alvin9999/pac2/master/clash.meta/1/config.yaml',
-	'https://www.githubip.xyz/Alvin9999/pac2/master/clash.meta/3/config.yaml',
-	'https://gitlab.com/free9999/ipupdate/-/raw/master/clash.meta/config.yaml',
-	'https://gitlab.com/free9999/ipupdate/-/raw/master/clash.meta/2/config.yaml',
-	'https://gitlab.com/free9999/ipupdate/-/raw/master/clash.meta/3/config.yaml',
-	'https://www.gitlabip.xyz/Alvin9999/pac2/master/clash.meta/15/config.yaml',
-	// clash.meta2
-	'https://gitlab.com/free9999/ipupdate/-/raw/master/clash.meta2/config.yaml',
-	'https://fastly.jsdelivr.net/gh/Alvin9999/pac2@latest/clash.meta2/config.yaml',
-	'https://www.gitlabip.xyz/Alvin9999/pac2/master/clash.meta2/13/config.yaml',
-	// v2go
-	'https://www.githubip.xyz/jsvpn/jsproxy/dev/yule/20200325/1299699.md',
-	// quick
-	'https://www.gitlabip.xyz/Alvin9999/pac2/master/quick/1/config.yaml',
-	'https://fastly.jsdelivr.net/gh/Alvin9999/pac2@latest/quick/config.yaml',
-	'https://gitlab.com/free9999/ipupdate/-/raw/master/quick/3/config.yaml',
-	// v2rayB
-	'https://fastly.jsdelivr.net/gh/jsvpn/jsproxy@dev/cbnews/20200809/1366909.md',
-	'https://www.githubip.xyz/jsvpn/jsproxy/dev/cbnews/20200809/1366909.md',
-	// clashB
-	'https://fastly.jsdelivr.net/gh/jsvpn/jsproxy@dev/baitai/20200329/1302338.md',
-	'https://www.githubip.xyz/jsvpn/jsproxy/dev/baitai/20200329/1302338.md',
-	// 其它
+	// ChromeGo/EdgeGo的订阅链接(已剔除内容重复的订阅链接)
+	"https://fastly.jsdelivr.net/gh/Alvin9999/pac2@latest/quick/4/config.yaml",
+	"https://gitlab.com/free9999/ipupdate/-/raw/master/quick/config.yaml",
+	"https://fastly.jsdelivr.net/gh/Alvin9999/pac2@latest/quick/config.yaml",
+	"https://fastly.jsdelivr.net/gh/Alvin9999/pac2@latest/clash.meta2/config.yaml",
+	"https://gitlab.com/free9999/ipupdate/-/raw/master/clash.meta2/2/config.yaml",
+	"https://fastly.jsdelivr.net/gh/Alvin9999/pac2@latest/clash.meta2/2/config.yaml",
+	"https://gitlab.com/free9999/ipupdate/-/raw/master/clash.meta2/3/config.yaml",
+	"https://gitlab.com/free9999/ipupdate/-/raw/master/clash.meta2/config.yaml",
+	"https://fastly.jsdelivr.net/gh/Alvin9999/pac2@latest/singbox/config.json",
+	"https://gitlab.com/free9999/ipupdate/-/raw/master/singbox/config.json",
+	"https://gitlab.com/free9999/ipupdate/-/raw/master/xray/config.json",
+	"https://gitlab.com/free9999/ipupdate/-/raw/master/xray/2/config.json",
+	"https://fastly.jsdelivr.net/gh/Alvin9999/pac2@latest/xray/config.json",
+	"https://www.githubip.xyz/Alvin9999/pac2/master/xray/2/config.json",
+	"https://gitlab.com/free9999/ipupdate/-/raw/master/hysteria/2/config.json",
+	"https://gitlab.com/free9999/ipupdate/-/raw/master/hysteria2/2/config.json",
+	"https://fastly.jsdelivr.net/gh/Alvin9999/PAC@latest/naiveproxy/config.json",
+	"https://gitlab.com/free9999/ipupdate/-/raw/master/naiveproxy/config.json",
+	// 也可以添加其它来源且数据格式为json或yaml的订阅链接
 	'https://raw.githubusercontent.com/aiboboxx/clashfree/main/clash.yml',
 ];
 

@@ -3109,52 +3109,26 @@ function utf8ToBase64(str2) {
   return base64;
 }
 var targetUrls = [
-  // hysteria
-  "https://gitlab.com/free9999/ipupdate/-/raw/master/hysteria/config.json",
-  "https://www.githubip.xyz/Alvin9999/pac2/master/hysteria/config.json",
-  "https://www.gitlabip.xyz/Alvin9999/pac2/master/hysteria/13/config.json",
-  "https://gitlab.com/free9999/ipupdate/-/raw/master/hysteria/2/config.json",
-  // hysteria2
-  "https://www.gitlabip.xyz/Alvin9999/pac2/master/hysteria2/1/config.json",
-  "https://www.githubip.xyz/Alvin9999/pac2/master/hysteria2/config.json",
-  "https://fastly.jsdelivr.net/gh/Alvin9999/pac2@latest/hysteria2/config.json",
-  "https://www.gitlabip.xyz/Alvin9999/pac2/master/hysteria2/13/config.json",
-  "https://fastly.jsdelivr.net/gh/Alvin9999/pac2@latest/hysteria2/2/config.json",
-  // naiveproxy
-  "https://www.gitlabip.xyz/Alvin9999/PAC/master/naiveproxy/1/config.json",
-  "https://www.githubip.xyz/Alvin9999/PAC/master/naiveproxy/config.json",
-  // singbox
-  "https://gitlab.com/free9999/ipupdate/-/raw/master/singbox/config.json",
-  // xray
-  "https://gitlab.com/free9999/ipupdate/-/raw/master/xray/config.json",
-  "https://www.githubip.xyz/Alvin9999/pac2/master/xray/config.json",
-  "https://www.gitlabip.xyz/Alvin9999/pac2/master/xray/3/config.json",
-  "https://gitlab.com/free9999/ipupdate/-/raw/master/xray/2/config.json",
-  // clash.meta
-  "https://www.githubip.xyz/Alvin9999/pac2/master/clash.meta/config.yaml",
-  "https://www.gitlabip.xyz/Alvin9999/pac2/master/clash.meta/1/config.yaml",
-  "https://www.githubip.xyz/Alvin9999/pac2/master/clash.meta/3/config.yaml",
-  "https://gitlab.com/free9999/ipupdate/-/raw/master/clash.meta/config.yaml",
-  "https://gitlab.com/free9999/ipupdate/-/raw/master/clash.meta/2/config.yaml",
-  "https://gitlab.com/free9999/ipupdate/-/raw/master/clash.meta/3/config.yaml",
-  "https://www.gitlabip.xyz/Alvin9999/pac2/master/clash.meta/15/config.yaml",
-  // clash.meta2
-  "https://gitlab.com/free9999/ipupdate/-/raw/master/clash.meta2/config.yaml",
-  "https://fastly.jsdelivr.net/gh/Alvin9999/pac2@latest/clash.meta2/config.yaml",
-  "https://www.gitlabip.xyz/Alvin9999/pac2/master/clash.meta2/13/config.yaml",
-  // v2go
-  "https://www.githubip.xyz/jsvpn/jsproxy/dev/yule/20200325/1299699.md",
-  // quick
-  "https://www.gitlabip.xyz/Alvin9999/pac2/master/quick/1/config.yaml",
+  // ChromeGo/EdgeGo的订阅链接(已剔除内容重复的订阅链接)
+  "https://fastly.jsdelivr.net/gh/Alvin9999/pac2@latest/quick/4/config.yaml",
+  "https://gitlab.com/free9999/ipupdate/-/raw/master/quick/config.yaml",
   "https://fastly.jsdelivr.net/gh/Alvin9999/pac2@latest/quick/config.yaml",
-  "https://gitlab.com/free9999/ipupdate/-/raw/master/quick/3/config.yaml",
-  // v2rayB
-  "https://fastly.jsdelivr.net/gh/jsvpn/jsproxy@dev/cbnews/20200809/1366909.md",
-  "https://www.githubip.xyz/jsvpn/jsproxy/dev/cbnews/20200809/1366909.md",
-  // clashB
-  "https://fastly.jsdelivr.net/gh/jsvpn/jsproxy@dev/baitai/20200329/1302338.md",
-  "https://www.githubip.xyz/jsvpn/jsproxy/dev/baitai/20200329/1302338.md",
-  // 其它
+  "https://fastly.jsdelivr.net/gh/Alvin9999/pac2@latest/clash.meta2/config.yaml",
+  "https://gitlab.com/free9999/ipupdate/-/raw/master/clash.meta2/2/config.yaml",
+  "https://fastly.jsdelivr.net/gh/Alvin9999/pac2@latest/clash.meta2/2/config.yaml",
+  "https://gitlab.com/free9999/ipupdate/-/raw/master/clash.meta2/3/config.yaml",
+  "https://gitlab.com/free9999/ipupdate/-/raw/master/clash.meta2/config.yaml",
+  "https://fastly.jsdelivr.net/gh/Alvin9999/pac2@latest/singbox/config.json",
+  "https://gitlab.com/free9999/ipupdate/-/raw/master/singbox/config.json",
+  "https://gitlab.com/free9999/ipupdate/-/raw/master/xray/config.json",
+  "https://gitlab.com/free9999/ipupdate/-/raw/master/xray/2/config.json",
+  "https://fastly.jsdelivr.net/gh/Alvin9999/pac2@latest/xray/config.json",
+  "https://www.githubip.xyz/Alvin9999/pac2/master/xray/2/config.json",
+  "https://gitlab.com/free9999/ipupdate/-/raw/master/hysteria/2/config.json",
+  "https://gitlab.com/free9999/ipupdate/-/raw/master/hysteria2/2/config.json",
+  "https://fastly.jsdelivr.net/gh/Alvin9999/PAC@latest/naiveproxy/config.json",
+  "https://gitlab.com/free9999/ipupdate/-/raw/master/naiveproxy/config.json",
+  // 也可以添加其它来源且数据格式为json或yaml的订阅链接
   "https://raw.githubusercontent.com/aiboboxx/clashfree/main/clash.yml"
 ];
 async function processUrls(targetUrls2) {
