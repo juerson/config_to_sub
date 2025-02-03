@@ -3,45 +3,45 @@ import yaml from 'js-yaml'; // npm install js-yaml
 // ----------------------------------------- 解析和构建 hysteria 节点 ---------------------------------------
 
 function parse_hysteria(outbounds_n) {
-	let server = findFieldValue(outbounds_n, "server") || "";
-	if (server.startsWith("127.0.0.1") || server === "") {
-		return "";
+	let server = findFieldValue(outbounds_n, 'server') || '';
+	if (server.startsWith('127.0.0.1') || server === '') {
+		return '';
 	}
-	let port = findFieldValue(outbounds_n, "server_port") || findFieldValue(outbounds_n, 'port');
+	let port = findFieldValue(outbounds_n, 'server_port') || findFieldValue(outbounds_n, 'port');
 
-	let upmbps_str = findFieldValue(outbounds_n, "up_mbps") || findFieldValue(outbounds_n, 'up');
-	let downmbps_str = findFieldValue(outbounds_n, "down_mbps") || findFieldValue(outbounds_n, 'down');
+	let upmbps_str = findFieldValue(outbounds_n, 'up_mbps') || findFieldValue(outbounds_n, 'up');
+	let downmbps_str = findFieldValue(outbounds_n, 'down_mbps') || findFieldValue(outbounds_n, 'down');
 
 	// 提取字符串中的数字，然后转换为数字类型
 	let upmbps = parseInt(String(upmbps_str).replace(/\D/g, ''), 10) || 0;
 	let downmbps = parseInt(String(downmbps_str).replace(/\D/g, ''), 10) || 0;
 
-	let auth = findFieldValue(outbounds_n, "auth_str") || findFieldValue(outbounds_n, 'auth-str');
-	let peer = findFieldValue(outbounds_n, "server_name") || findFieldValue(outbounds_n, 'sni') || "";
+	let auth = findFieldValue(outbounds_n, 'auth_str') || findFieldValue(outbounds_n, 'auth-str');
+	let peer = findFieldValue(outbounds_n, 'server_name') || findFieldValue(outbounds_n, 'sni') || '';
 
 	let protocolValue = findFieldValue(outbounds_n, 'protocol');
-	let protocol = protocolValue !== "hysteria" ? protocolValue : ""
+	let protocol = protocolValue !== 'hysteria' ? protocolValue : '';
 
-	let insecureFieldValue = findFieldValue(outbounds_n, "insecure");
-	let insecure = [null, true].includes(insecureFieldValue) ? 1 : "";
+	let insecureFieldValue = findFieldValue(outbounds_n, 'insecure');
+	let insecure = [null, true].includes(insecureFieldValue) ? 1 : '';
 
-	let alpnValue = findFieldValue(outbounds_n, "alpn");
+	let alpnValue = findFieldValue(outbounds_n, 'alpn');
 	let alpn;
-	if (typeof alpnValue === "string") {
+	if (typeof alpnValue === 'string') {
 		alpn = alpnValue;
 	} else {
 		alpn = alpnValue.length === 1 ? alpnValue[0].toString() : alpnValue.join(',');
 	}
 
 	let hysteriaDict = {
-		"upmbps": upmbps,
-		"downmbps": downmbps,
-		"auth": auth,
-		"protocol": protocol,
-		"insecure": insecure,
-		"peer": peer,
-		"alpn": alpn,
-	}
+		upmbps: upmbps,
+		downmbps: downmbps,
+		auth: auth,
+		protocol: protocol,
+		insecure: insecure,
+		peer: peer,
+		alpn: alpn,
+	};
 	// 过滤掉值为空的键值对
 	const filteredParams = Object.fromEntries(
 		Object.entries(hysteriaDict).filter(([key, value]) => value !== '' && value !== null && value !== undefined)
@@ -57,40 +57,40 @@ function parse_hysteria(outbounds_n) {
 // ------------------------------------------ 解析和构建 hy2 节点 -------------------------------------------
 
 function parse_hy2(outbounds_n) {
-	let server = findFieldValue(outbounds_n, 'server') || "";
-	if (server.startsWith("127.0.0.1") || server === "") {
-		return "";
+	let server = findFieldValue(outbounds_n, 'server') || '';
+	if (server.startsWith('127.0.0.1') || server === '') {
+		return '';
 	}
 	let port = findFieldValue(outbounds_n, 'port');
 
 	// 排除"domain:port"、"ipv4:port" 或 "ipv6:port" 这三种情况地址的正则表达式
-	let genericAddressRegex = /^(?!.*:\d+$)(?!\[.*\].*:\d+$)/
+	let genericAddressRegex = /^(?!.*:\d+$)(?!\[.*\].*:\d+$)/;
 	if (genericAddressRegex.test(server)) {
 		server = `${server}:${port}`;
 	}
 
 	let password = findFieldValue(outbounds_n, 'password') || findFieldValue(outbounds_n, 'auth');
-	let obfs = findFieldValue(outbounds_n, 'obfs') || "";
-	let obfs_password = findFieldValue(outbounds_n, 'obfs-password') || "";
-	let sni = findFieldValue(outbounds_n, 'sni') || "";
+	let obfs = findFieldValue(outbounds_n, 'obfs') || '';
+	let obfs_password = findFieldValue(outbounds_n, 'obfs-password') || '';
+	let sni = findFieldValue(outbounds_n, 'sni') || '';
 
-	let up = findFieldValue(outbounds_n, 'up') || "80";
-	let down = findFieldValue(outbounds_n, 'down') || "100";
+	let up = findFieldValue(outbounds_n, 'up') || '80';
+	let down = findFieldValue(outbounds_n, 'down') || '100';
 	// 提取字符串中的数字，然后转换为数字类型
 	let upmbps = parseInt(String(up).replace(/\D/g, ''), 10) || 0;
 	let downmbps = parseInt(String(down).replace(/\D/g, ''), 10) || 0;
 
-	let insecureFieldValue = findFieldValue(outbounds_n, "insecure");
-	let insecure = [null, true].includes(insecureFieldValue) ? 1 : "";
+	let insecureFieldValue = findFieldValue(outbounds_n, 'insecure');
+	let insecure = [null, true].includes(insecureFieldValue) ? 1 : '';
 
 	let hy2Dict = {
-		"upmbps": upmbps,
-		"downmbps": downmbps,
-		"obfs": obfs,
-		"obfs-password": obfs_password,
-		"sni": sni,
-		"insecure": insecure
-	}
+		upmbps: upmbps,
+		downmbps: downmbps,
+		obfs: obfs,
+		'obfs-password': obfs_password,
+		sni: sni,
+		insecure: insecure,
+	};
 
 	// 过滤掉值为空的键值对
 	const filteredParams = Object.fromEntries(
@@ -107,58 +107,58 @@ function parse_hy2(outbounds_n) {
 // ----------------------------------------- 解析和构建 vless 节点 ------------------------------------------
 
 function parse_vless(outbounds_n) {
-	let address = findFieldValue(outbounds_n, "address") || findFieldValue(outbounds_n, 'server') || "";
-	if (address === "127.0.0.1" || address === "") {
-		return "";
+	let address = findFieldValue(outbounds_n, 'address') || findFieldValue(outbounds_n, 'server') || '';
+	if (address === '127.0.0.1' || address === '') {
+		return '';
 	}
-	let port = findFieldValue(outbounds_n, "port");
-	let uuid = findFieldValue(outbounds_n, "id") || findFieldValue(outbounds_n, 'uuid');
-	let encryption = findFieldValue(outbounds_n, "encryption") || "none"; // 加密方式
-	let flow = findFieldValue(outbounds_n, 'flow') || "";
-	let network = findFieldValue(outbounds_n, "network");
-	let host = findFieldValue(outbounds_n, "Host") || findFieldValue(outbounds_n, 'host') || "";
-	let path = findFieldValue(outbounds_n, "path") || "";
+	let port = findFieldValue(outbounds_n, 'port');
+	let uuid = findFieldValue(outbounds_n, 'id') || findFieldValue(outbounds_n, 'uuid');
+	let encryption = findFieldValue(outbounds_n, 'encryption') || 'none'; // 加密方式
+	let flow = findFieldValue(outbounds_n, 'flow') || '';
+	let network = findFieldValue(outbounds_n, 'network');
+	let host = findFieldValue(outbounds_n, 'Host') || findFieldValue(outbounds_n, 'host') || '';
+	let path = findFieldValue(outbounds_n, 'path') || '';
 	// 目前发现publicKey和shortId是reality独有
-	let public_key = findFieldValue(outbounds_n, 'public-key') || findFieldValue(outbounds_n, 'publicKey') || "";
-	let short_id = findFieldValue(outbounds_n, 'short-id') || findFieldValue(outbounds_n, 'shortId') || "";
+	let public_key = findFieldValue(outbounds_n, 'public-key') || findFieldValue(outbounds_n, 'publicKey') || '';
+	let short_id = findFieldValue(outbounds_n, 'short-id') || findFieldValue(outbounds_n, 'shortId') || '';
 	// sni
-	let serverName = findFieldValue(outbounds_n, "serverName") || findFieldValue(outbounds_n, 'servername') || "";
-	if (host === "" && serverName === "") {
-		host = address
-	} else if (host === "" && serverName !== "") {
-		host = serverName
+	let serverName = findFieldValue(outbounds_n, 'serverName') || findFieldValue(outbounds_n, 'servername') || '';
+	if (host === '' && serverName === '') {
+		host = address;
+	} else if (host === '' && serverName !== '') {
+		host = serverName;
 	}
 	// 传输层安全(TLS)
 	let tls_security;
-	if (public_key !== "") {
-		tls_security = "reality";
+	if (public_key !== '') {
+		tls_security = 'reality';
 	} else {
-		let tls = findFieldValue(outbounds_n.streamSettings, 'security') || findFieldValue(outbounds_n, 'tls') || "";
-		if (tls === "none") {
-			tls_security = "";
+		let tls = findFieldValue(outbounds_n.streamSettings, 'security') || findFieldValue(outbounds_n, 'tls') || '';
+		if (tls === 'none') {
+			tls_security = '';
 		} else if (tls === true) {
-			tls_security = "tls";
+			tls_security = 'tls';
 		} else {
-			tls_security = "";
+			tls_security = '';
 		}
 	}
-	if (tls_security === "" && network === "ws" && serverName !== "") {
-		tls_security = "tls";
+	if (tls_security === '' && network === 'ws' && serverName !== '') {
+		tls_security = 'tls';
 	}
-	let fp = findFieldValue(outbounds_n, "fingerprint") || findFieldValue(outbounds_n, 'client-fingerprint') || "";
+	let fp = findFieldValue(outbounds_n, 'fingerprint') || findFieldValue(outbounds_n, 'client-fingerprint') || '';
 	let vlessDict = {
-		"encryption": encryption, // 加密方式
-		"flow": flow,
-		"security": tls_security, // 传输层安全(TLS)
-		"sni": serverName,
-		"fp": fp,
-		"pbk": public_key,
-		"sid": short_id,
-		"type": network, // 传输协议(network)
-		"host": host, // 伪装域名(host)
-		"path": path,
-		"headerType": "" // 伪装类型(type)
-	}
+		encryption: encryption, // 加密方式
+		flow: flow,
+		security: tls_security, // 传输层安全(TLS)
+		sni: serverName,
+		fp: fp,
+		pbk: public_key,
+		sid: short_id,
+		type: network, // 传输协议(network)
+		host: host, // 伪装域名(host)
+		path: path,
+		headerType: '', // 伪装类型(type)
+	};
 
 	// 过滤掉值为空的键值对
 	const filteredParams = Object.fromEntries(
@@ -175,51 +175,55 @@ function parse_vless(outbounds_n) {
 // ----------------------------------------- 解析和构建 vmess 节点 ------------------------------------------
 
 function parse_vmess(outbounds_n) {
-	let address = findFieldValue(outbounds_n, "address") || findFieldValue(outbounds_n, 'server') || "";
-	if (address === "127.0.0.1" || address === "") {
-		return "";
+	let address = findFieldValue(outbounds_n, 'address') || findFieldValue(outbounds_n, 'server') || '';
+	if (address === '127.0.0.1' || address === '') {
+		return '';
 	}
 	let port = findFieldValue(outbounds_n, 'port');
 	let uuid = findFieldValue(outbounds_n, 'id') || findFieldValue(outbounds_n, 'uuid');
 	let alterId = findFieldValue(outbounds_n, 'alterId') || 0;
 
 	// 加密方式(security)
-	let auto_security = findFieldValue(outbounds_n, 'cipher') || findFieldValue(outbounds_n.settings, 'security') || "auto";
+	let auto_security = findFieldValue(outbounds_n, 'cipher') || findFieldValue(outbounds_n.settings, 'security') || 'auto';
 
 	// 传输协议(network)
 	let network = findFieldValue(outbounds_n, 'network');
 	// 伪装类型(type)
-	let type_encryption = findFieldValue(outbounds_n, 'encryption') || "none";
+	let type_encryption = findFieldValue(outbounds_n, 'encryption') || 'none';
 
 	// 传输层安全(TLS)
-	let tls = findFieldValue(outbounds_n.streamSettings, 'security') || findFieldValue(outbounds_n, 'tls') || "";
-	let tls_security = tls === true ? 'tls' || "" : tls
+	let tls = findFieldValue(outbounds_n.streamSettings, 'security') || findFieldValue(outbounds_n, 'tls') || '';
+	let tls_security = tls === true ? 'tls' || '' : tls;
 
-	let path = findFieldValue(outbounds_n, 'path') || findFieldValue(outbounds_n, 'ws-path') || findFieldValue(outbounds_n, 'grpc-service-name') || "/";
+	let path =
+		findFieldValue(outbounds_n, 'path') ||
+		findFieldValue(outbounds_n, 'ws-path') ||
+		findFieldValue(outbounds_n, 'grpc-service-name') ||
+		'/';
 	// 伪装域名(host)
-	let host = findFieldValue(outbounds_n, 'Host') || findFieldValue(outbounds_n, 'host') || "";
-	let serverName = findFieldValue(outbounds_n, 'sni') || findFieldValue(outbounds_n, 'serverName') || "";
-	if (serverName === "" && host === "") {
+	let host = findFieldValue(outbounds_n, 'Host') || findFieldValue(outbounds_n, 'host') || '';
+	let serverName = findFieldValue(outbounds_n, 'sni') || findFieldValue(outbounds_n, 'serverName') || '';
+	if (serverName === '' && host === '') {
 		host = address;
 	}
-	let fp = findFieldValue(outbounds_n, 'client-fingerprint') || findFieldValue(outbounds_n, 'fingerprint') || "";
+	let fp = findFieldValue(outbounds_n, 'client-fingerprint') || findFieldValue(outbounds_n, 'fingerprint') || '';
 	let vmess_dict = {
-		"v": "2",
-		"ps": `[vmess]_${address}:${port}`,
-		"add": address,
-		"port": port,
-		"id": uuid,
-		"aid": alterId, // 额外ID(alterId)
-		"scy": auto_security, // 加密方式(security)
-		"net": network, // 传输协议(network)
-		"type": type_encryption, // 伪装类型(type)
-		"host": host, // 伪装域名(host)
-		"path": path, // 路径
-		"tls": tls_security, // 传输层安全(TLS)
-		"sni": serverName,
-		"alpn": "",
-		"fp": fp
-	}
+		v: '2',
+		ps: `[vmess]_${address}:${port}`,
+		add: address,
+		port: port,
+		id: uuid,
+		aid: alterId, // 额外ID(alterId)
+		scy: auto_security, // 加密方式(security)
+		net: network, // 传输协议(network)
+		type: type_encryption, // 伪装类型(type)
+		host: host, // 伪装域名(host)
+		path: path, // 路径
+		tls: tls_security, // 传输层安全(TLS)
+		sni: serverName,
+		alpn: '',
+		fp: fp,
+	};
 	// 将对象转换为 JSON 字符串（方便后面进行base64编码）
 	const jsonString = JSON.stringify(vmess_dict);
 
@@ -238,16 +242,16 @@ function parse_vmess(outbounds_n) {
 // -------------------------------------- 解析和构建 shadowsocks 节点 ---------------------------------------
 
 function parse_shadowsocks(outbounds_n) {
-	let address = findFieldValue(outbounds_n, 'address') || findFieldValue(outbounds_n, 'server') || "";
-	if (address === "127.0.0.1" || address === "") {
-		return "";
+	let address = findFieldValue(outbounds_n, 'address') || findFieldValue(outbounds_n, 'server') || '';
+	if (address === '127.0.0.1' || address === '') {
+		return '';
 	}
 
 	let port = findFieldValue(outbounds_n, 'port');
 	let method = findFieldValue(outbounds_n, 'method') || findFieldValue(outbounds_n, 'cipher');
 	let password = findFieldValue(outbounds_n, 'password');
 	let method_with_password = `${method}:${password}`;
-	let base64EncodedString = utf8ToBase64(method_with_password);
+	let base64EncodedString = base64Encode(method_with_password);
 
 	let ss = `ss://${base64EncodedString}@${address}:${port}#[ss]_${address}`;
 
@@ -257,33 +261,33 @@ function parse_shadowsocks(outbounds_n) {
 // ----------------------------------------- 解析和构建 trojan 节点 -----------------------------------------
 
 function parse_trojan(outbounds_n) {
-	let server = findFieldValue(outbounds_n, "server") || "";
-	if (server.startsWith("127.0.0.1") || server === "") {
-		return "";
+	let server = findFieldValue(outbounds_n, 'server') || '';
+	if (server.startsWith('127.0.0.1') || server === '') {
+		return '';
 	}
 	let port = findFieldValue(outbounds_n, 'port');
 	let password = findFieldValue(outbounds_n, 'password');
-	let network = findFieldValue(outbounds_n, 'network') || "tcp";
-	let path = findFieldValue(outbounds_n, 'path') || "";
-	let host = findFieldValue(outbounds_n, 'Host') || findFieldValue(outbounds_n, 'host') || "";
-	let sni = findFieldValue(outbounds_n, 'sni') || "";
-	let fp = findFieldValue(outbounds_n, 'client-fingerprint') || findFieldValue(outbounds_n, 'fingerprint') || "";
-	let alpn = findFieldValue(outbounds_n, 'alpn') || ""; // 没有确定字段是否这个名字
-	let tls_security = "";
+	let network = findFieldValue(outbounds_n, 'network') || 'tcp';
+	let path = findFieldValue(outbounds_n, 'path') || '';
+	let host = findFieldValue(outbounds_n, 'Host') || findFieldValue(outbounds_n, 'host') || '';
+	let sni = findFieldValue(outbounds_n, 'sni') || '';
+	let fp = findFieldValue(outbounds_n, 'client-fingerprint') || findFieldValue(outbounds_n, 'fingerprint') || '';
+	let alpn = findFieldValue(outbounds_n, 'alpn') || ''; // 没有确定字段是否这个名字
+	let tls_security = '';
 	if (sni) {
-		tls_security = "tls";
+		tls_security = 'tls';
 	}
 
 	let trojanDict = {
-		"security": tls_security,
-		"allowInsecure": 1,
-		"sni": sni,
-		"fp": fp,
-		"type": network,
-		"host": host,
-		"alpn": alpn,
-		"path": path
-	}
+		security: tls_security,
+		allowInsecure: 1,
+		sni: sni,
+		fp: fp,
+		type: network,
+		host: host,
+		alpn: alpn,
+		path: path,
+	};
 
 	// 过滤掉值为空的键值对
 	const filteredParams = Object.fromEntries(
@@ -302,15 +306,15 @@ function parse_trojan(outbounds_n) {
 function parse_tuic(outbounds_n) {
 	let uuid = findFieldValue(outbounds_n, 'uuid');
 	let password = findFieldValue(outbounds_n, 'password');
-	let server = findFieldValue(outbounds_n, 'server') || "";
-	if (server === "127.0.0.1" || server === "") {
-		return "";
+	let server = findFieldValue(outbounds_n, 'server') || '';
+	if (server === '127.0.0.1' || server === '') {
+		return '';
 	}
 	let port = findFieldValue(outbounds_n, 'port');
 	let congestion_controller = findFieldValue(outbounds_n, 'congestion-controller');
 	let udp_relay_mode = findFieldValue(outbounds_n, 'udp-relay-mode');
-	let sni = findFieldValue(outbounds_n, 'sni') || "";
-	let alpnValue = findFieldValue(outbounds_n, "alpn");
+	let sni = findFieldValue(outbounds_n, 'sni') || '';
+	let alpnValue = findFieldValue(outbounds_n, 'alpn');
 	var alpn;
 	if (alpnValue.length === 1) {
 		// 如果数组只有一个元素，直接获取该元素
@@ -320,12 +324,12 @@ function parse_tuic(outbounds_n) {
 		alpn = alpnValue.join(',');
 	}
 	let tuicDict = {
-		"congestion_control": congestion_controller,
-		"udp_relay_mode": udp_relay_mode,
-		"alpn": alpn,
-		"sni": sni,
-		"allow_insecure": 1
-	}
+		congestion_control: congestion_controller,
+		udp_relay_mode: udp_relay_mode,
+		alpn: alpn,
+		sni: sni,
+		allow_insecure: 1,
+	};
 	// 过滤掉值为空的键值对
 	const filteredParams = Object.fromEntries(
 		Object.entries(tuicDict).filter(([key, value]) => value !== '' && value !== null && value !== undefined)
@@ -367,8 +371,10 @@ async function fetchWebPageContent(url) {
 		}
 
 		// 读取并返回文本内容，同时替换"!<str>"
-		let content = await response.text();
-		return content.replace(/!<str>/g, "");
+		let content = (await response.text()).replace(/!<str>/g, '');
+
+		// 去掉HTML标签，包括HTML实体字符
+		return stripHtmlTags(content);
 	} catch (error) {
 		console.error(`获取${url} 网页内容失败: ${error.message}`);
 		return {};
@@ -383,11 +389,11 @@ async function fetchAndProcessUrl(url) {
 	let outbounds; // 可能是字段outbounds值的列表，也可能是字段proxies值的列表
 	try {
 		jsonObject = JSON.parse(content);
-		outbounds = findFieldValue(jsonObject, "outbounds");
+		outbounds = findFieldValue(jsonObject, 'outbounds');
 	} catch (jsonError) {
 		let yamlObject = yaml.load(content); // 使用js-yaml库解析yaml
 		if (yamlObject && typeof yamlObject === 'object') {
-			outbounds = findFieldValue(yamlObject, "proxies");
+			outbounds = findFieldValue(yamlObject, 'proxies');
 		}
 	}
 
@@ -395,56 +401,56 @@ async function fetchAndProcessUrl(url) {
 		/** 处理一个节点 */
 
 		// hy2
-		let server = findFieldValue(jsonObject, "server");
-		let pwd_auth = findFieldValue(jsonObject, "auth");
-		let sni = findFieldValue(jsonObject, "sni");
+		let server = findFieldValue(jsonObject, 'server');
+		let pwd_auth = findFieldValue(jsonObject, 'auth');
+		let sni = findFieldValue(jsonObject, 'sni');
 
-		let insecureFieldValue = findFieldValue(jsonObject, "insecure");
-		let insecure = [null, true].includes(insecureFieldValue) ? 1 : "";
+		let insecureFieldValue = findFieldValue(jsonObject, 'insecure');
+		let insecure = [null, true].includes(insecureFieldValue) ? 1 : '';
 
 		// hy1
-		let upmbps = findFieldValue(jsonObject, "up_mbps");
-		let downmbps = findFieldValue(jsonObject, "down_mbps");
-		let obfsParam = findFieldValue(jsonObject, "obfs") || "";
-		let auth = findFieldValue(jsonObject, "auth_str") || "";
-		let protocol = findFieldValue(jsonObject, "protocol") || "";
-		let peer = findFieldValue(jsonObject, "server_name") || "";
-		let alpn = findFieldValue(jsonObject, "alpn");
-		let recv_window = findFieldValue(jsonObject, "recv_window") || "";
-		let recv_window_conn = findFieldValue(jsonObject, "recv_window_conn") || "";
+		let upmbps = findFieldValue(jsonObject, 'up_mbps');
+		let downmbps = findFieldValue(jsonObject, 'down_mbps');
+		let obfsParam = findFieldValue(jsonObject, 'obfs') || '';
+		let auth = findFieldValue(jsonObject, 'auth_str') || '';
+		let protocol = findFieldValue(jsonObject, 'protocol') || '';
+		let peer = findFieldValue(jsonObject, 'server_name') || '';
+		let alpn = findFieldValue(jsonObject, 'alpn');
+		let recv_window = findFieldValue(jsonObject, 'recv_window') || '';
+		let recv_window_conn = findFieldValue(jsonObject, 'recv_window_conn') || '';
 
 		// naive
-		let proxyFieldValue = findFieldValue(jsonObject, "proxy");
+		let proxyFieldValue = findFieldValue(jsonObject, 'proxy');
 
 		// 使用正则表达式进行匹配naive配置文件中proxy中的值
-		const pattern = /^https:\/\/.*@.*$/
+		const pattern = /^https:\/\/.*@.*$/;
 		const isMatch = pattern.test(proxyFieldValue);
 
 		if (server && pwd_auth) {
 			// 判断是hy2
 
-			let hy2 = `hy2://${pwd_auth}@${server}?insecure=${insecure}&sni=${sni}#[hy2]_${server}`
+			let hy2 = `hy2://${pwd_auth}@${server}?insecure=${insecure}&sni=${sni}#[hy2]_${server}`;
 
-			return hy2
+			return hy2;
 		} else if (server && auth && alpn && upmbps !== null && downmbps !== null) {
 			// 判断是hy1
 
 			let hysteriaDict = {
-				"upmbps": upmbps,
-				"downmbps": downmbps,
-				"obfs": "xplus",
-				"obfsParam": obfsParam,
-				"auth": auth,
-				"protocol": protocol,
-				"insecure": insecure,
-				"peer": peer,
-				"alpn": alpn,
-				"recv_window": recv_window,
-				"recv_window_conn": recv_window_conn
-			}
+				upmbps: upmbps,
+				downmbps: downmbps,
+				obfs: 'xplus',
+				obfsParam: obfsParam,
+				auth: auth,
+				protocol: protocol,
+				insecure: insecure,
+				peer: peer,
+				alpn: alpn,
+				recv_window: recv_window,
+				recv_window_conn: recv_window_conn,
+			};
 			// 没有对应的值，就从hysteriaDict中删除
-			if (hysteriaDict["obfsParam"] === "") {
-				delete hysteriaDict["obfs"];
+			if (hysteriaDict['obfsParam'] === '') {
+				delete hysteriaDict['obfs'];
 			}
 			// 过滤掉值为空的键值对
 			const filteredParams = Object.fromEntries(
@@ -455,18 +461,18 @@ async function fetchAndProcessUrl(url) {
 
 			let hy1 = `hysteria://${server}?${encodedParams}#[hysteria]_${server}`;
 
-			return hy1
-		} else if (proxyFieldValue && isMatch && (typeof proxyFieldValue === "string")) {
+			return hy1;
+		} else if (proxyFieldValue && isMatch && typeof proxyFieldValue === 'string') {
 			// 判断是naive
 
 			// 从右侧找到 ":" 和 "@" 的索引
-			const colonIndex = proxyFieldValue.lastIndexOf(":");
-			const atIndex = proxyFieldValue.lastIndexOf("@");
+			const colonIndex = proxyFieldValue.lastIndexOf(':');
+			const atIndex = proxyFieldValue.lastIndexOf('@');
 			// 截取 "@" 后到 ":" 之间的内容
 			const extractedContent = proxyFieldValue.substring(atIndex + 1, colonIndex);
 			let naive = `naive+${proxyFieldValue}#[naive]_${extractedContent}`;
 
-			return naive
+			return naive;
 		}
 	} else if (outbounds && Array.isArray(outbounds)) {
 		/** 处理多个节点 */
@@ -474,51 +480,51 @@ async function fetchAndProcessUrl(url) {
 		// 存储多个节点链接
 		const uniqueSet = new Set();
 
-		let allProxyType = ["hysteria", "hysteria1", "hy1", "hysteria2", "hy2", "vless", "vmess", "trojan", "ss", "shadowsocks", "tuic"]
+		let allProxyType = ['hysteria', 'hysteria1', 'hy1', 'hysteria2', 'hy2', 'vless', 'vmess', 'trojan', 'ss', 'shadowsocks', 'tuic'];
 		// 遍历数组中的节点
 		for (var i = 0; i < outbounds.length; i++) {
-			let proxyType = findFieldValue(outbounds[i], "protocol");
+			let proxyType = findFieldValue(outbounds[i], 'protocol');
 			if (!allProxyType.includes(proxyType)) {
-				proxyType = findFieldValue(outbounds[i], "type")
+				proxyType = findFieldValue(outbounds[i], 'type');
 			}
 			// 检查到是hysteria类型的节点
-			if (["hysteria", "hysteria1", "hy1"].includes(proxyType)) {
+			if (['hysteria', 'hysteria1', 'hy1'].includes(proxyType)) {
 				let hy1 = parse_hysteria(outbounds[i]);
 				if (hy1) {
 					uniqueSet.add(hy1);
 				}
 				// 检查到是hy2类型的节点
-			} else if (["hy2", "hysteria2"].includes(proxyType)) {
+			} else if (['hy2', 'hysteria2'].includes(proxyType)) {
 				let hy2 = parse_hy2(outbounds[i]);
 				if (hy2) {
 					uniqueSet.add(hy2);
 				}
 				// 检查到是shadowsocks类型的节点
-			} else if (["ss", "shadowsocks"].includes(proxyType)) {
+			} else if (['ss', 'shadowsocks'].includes(proxyType)) {
 				let ss = parse_shadowsocks(outbounds[i]);
 				if (ss) {
 					uniqueSet.add(ss);
 				}
 				// 检查到是vless类型的节点
-			} else if (proxyType === "vless") {
+			} else if (proxyType === 'vless') {
 				let vless = parse_vless(outbounds[i]);
 				if (vless) {
 					uniqueSet.add(vless);
 				}
 				// 检查到是vmess类型的节点
-			} else if (proxyType === "vmess") {
+			} else if (proxyType === 'vmess') {
 				let vmess = parse_vmess(outbounds[i]);
 				if (vmess) {
-					uniqueSet.add(vmess)
+					uniqueSet.add(vmess);
 				}
 				// 检查到是trojan类型的节点
-			} else if (proxyType === "trojan") {
+			} else if (proxyType === 'trojan') {
 				let trojan = parse_trojan(outbounds[i]);
 				if (trojan) {
 					uniqueSet.add(trojan);
 				}
 				// 检查到是tuic类型的节点
-			} else if (proxyType === "tuic") {
+			} else if (proxyType === 'tuic') {
 				let tuic = parse_tuic(outbounds[i]);
 				if (tuic) {
 					uniqueSet.add(tuic);
@@ -532,12 +538,43 @@ async function fetchAndProcessUrl(url) {
 	}
 }
 
+// 删除字符串中所有HTML标签
+function stripHtmlTags(str) {
+	const entities = {
+		'&lt;': '<',
+		'&gt;': '>',
+		// .....
+	};
+	// 动态生成正则表达式，匹配所有实体
+	const regex = new RegExp(
+		'&(' +
+			Object.keys(entities)
+				.map((e) => e.slice(1, -1))
+				.join('|') +
+			');',
+		'g'
+	);
+	// 替换HTML实体
+	let replaced = str.replace(regex, (match) => entities[match]);
+	// 去掉HTML标签
+	return replaced.replace(/<[^>]*>/g, '');
+}
+
 // 将UTF-8字符串转换为Base64编码
-function utf8ToBase64(str) {
+function base64Encode(str) {
 	const encoder = new TextEncoder();
-	const data = encoder.encode(str);
-	const base64 = btoa(String.fromCharCode(...new Uint8Array(data)));
-	return base64;
+	const uint8Array = encoder.encode(str);
+	const chunkSize = 0x8000; // 每个块的大小 (32768)
+	let binary = '';
+
+	// 分块处理，避免一次性展开整个数组导致调用栈溢出
+	for (let i = 0; i < uint8Array.length; i += chunkSize) {
+		const chunk = uint8Array.subarray(i, i + chunkSize);
+		// 使用 Function.prototype.apply 将小块转换为字符串
+		binary += String.fromCharCode.apply(null, chunk);
+	}
+
+	return btoa(binary);
 }
 
 // -------------------------------------------- 要抓取的网页链接 --------------------------------------------
@@ -551,24 +588,24 @@ function utf8ToBase64(str) {
  */
 const targetUrls = [
 	// ChromeGo/EdgeGo的订阅链接(已剔除内容重复的订阅链接)
-	"https://fastly.jsdelivr.net/gh/Alvin9999/pac2@latest/quick/4/config.yaml",
-	"https://gitlab.com/free9999/ipupdate/-/raw/master/quick/config.yaml",
-	"https://fastly.jsdelivr.net/gh/Alvin9999/pac2@latest/quick/config.yaml",
-	"https://fastly.jsdelivr.net/gh/Alvin9999/pac2@latest/clash.meta2/config.yaml",
-	"https://gitlab.com/free9999/ipupdate/-/raw/master/clash.meta2/2/config.yaml",
-	"https://fastly.jsdelivr.net/gh/Alvin9999/pac2@latest/clash.meta2/2/config.yaml",
-	"https://gitlab.com/free9999/ipupdate/-/raw/master/clash.meta2/3/config.yaml",
-	"https://gitlab.com/free9999/ipupdate/-/raw/master/clash.meta2/config.yaml",
-	"https://fastly.jsdelivr.net/gh/Alvin9999/pac2@latest/singbox/config.json",
-	"https://gitlab.com/free9999/ipupdate/-/raw/master/singbox/config.json",
-	"https://gitlab.com/free9999/ipupdate/-/raw/master/xray/config.json",
-	"https://gitlab.com/free9999/ipupdate/-/raw/master/xray/2/config.json",
-	"https://fastly.jsdelivr.net/gh/Alvin9999/pac2@latest/xray/config.json",
-	"https://www.githubip.xyz/Alvin9999/pac2/master/xray/2/config.json",
-	"https://gitlab.com/free9999/ipupdate/-/raw/master/hysteria/2/config.json",
-	"https://gitlab.com/free9999/ipupdate/-/raw/master/hysteria2/2/config.json",
-	"https://fastly.jsdelivr.net/gh/Alvin9999/PAC@latest/naiveproxy/config.json",
-	"https://gitlab.com/free9999/ipupdate/-/raw/master/naiveproxy/config.json",
+	'https://fastly.jsdelivr.net/gh/Alvin9999/pac2@latest/quick/4/config.yaml',
+	'https://gitlab.com/free9999/ipupdate/-/raw/master/quick/config.yaml',
+	'https://fastly.jsdelivr.net/gh/Alvin9999/pac2@latest/quick/config.yaml',
+	'https://fastly.jsdelivr.net/gh/Alvin9999/pac2@latest/clash.meta2/config.yaml',
+	'https://gitlab.com/free9999/ipupdate/-/raw/master/clash.meta2/2/config.yaml',
+	'https://fastly.jsdelivr.net/gh/Alvin9999/pac2@latest/clash.meta2/2/config.yaml',
+	'https://gitlab.com/free9999/ipupdate/-/raw/master/clash.meta2/3/config.yaml',
+	'https://gitlab.com/free9999/ipupdate/-/raw/master/clash.meta2/config.yaml',
+	'https://fastly.jsdelivr.net/gh/Alvin9999/pac2@latest/singbox/config.json',
+	'https://gitlab.com/free9999/ipupdate/-/raw/master/singbox/config.json',
+	'https://gitlab.com/free9999/ipupdate/-/raw/master/xray/config.json',
+	'https://gitlab.com/free9999/ipupdate/-/raw/master/xray/2/config.json',
+	'https://fastly.jsdelivr.net/gh/Alvin9999/pac2@latest/xray/config.json',
+	'https://www.githubip.xyz/Alvin9999/pac2/master/xray/2/config.json',
+	'https://gitlab.com/free9999/ipupdate/-/raw/master/hysteria/2/config.json',
+	'https://gitlab.com/free9999/ipupdate/-/raw/master/hysteria2/2/config.json',
+	'https://fastly.jsdelivr.net/gh/Alvin9999/PAC@latest/naiveproxy/config.json',
+	'https://gitlab.com/free9999/ipupdate/-/raw/master/naiveproxy/config.json',
 	// 也可以添加其它来源且数据格式为json或yaml的订阅链接
 	'https://raw.githubusercontent.com/aiboboxx/clashfree/main/clash.yml',
 ];
@@ -588,9 +625,7 @@ async function processUrls(targetUrls) {
 			const promise = Promise.resolve().then(() => iteratorFn(item));
 			results.push(promise);
 			if (executing.length < poolLimit) {
-				const executingPromise = promise.then(() =>
-					executing.splice(executing.indexOf(executingPromise), 1)
-				);
+				const executingPromise = promise.then(() => executing.splice(executing.indexOf(executingPromise), 1));
 				executing.push(executingPromise);
 			} else {
 				await Promise.race(executing);
@@ -604,7 +639,7 @@ async function processUrls(targetUrls) {
 		const link = await fetchAndProcessUrl(url);
 		if (Array.isArray(link)) {
 			// 剔除重复的link节点链接
-			link.forEach(item => {
+			link.forEach((item) => {
 				if (!results.includes(item)) {
 					results.push(item);
 				}
@@ -664,7 +699,7 @@ export default {
 			console.error(`Error in fetch function: ${error.message}`);
 			// 返回一个带有错误信息的响应
 			return new Response(`Error fetching web page: ${error.message}`, {
-				status: 500
+				status: 500,
 			});
 		}
 	},

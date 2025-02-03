@@ -2719,13 +2719,13 @@ function parse_hysteria(outbounds_n) {
     alpn = alpnValue.length === 1 ? alpnValue[0].toString() : alpnValue.join(",");
   }
   let hysteriaDict = {
-    "upmbps": upmbps,
-    "downmbps": downmbps,
-    "auth": auth,
-    "protocol": protocol,
-    "insecure": insecure,
-    "peer": peer,
-    "alpn": alpn
+    upmbps,
+    downmbps,
+    auth,
+    protocol,
+    insecure,
+    peer,
+    alpn
   };
   const filteredParams = Object.fromEntries(
     Object.entries(hysteriaDict).filter(([key, value]) => value !== "" && value !== null && value !== void 0)
@@ -2755,12 +2755,12 @@ function parse_hy2(outbounds_n) {
   let insecureFieldValue = findFieldValue(outbounds_n, "insecure");
   let insecure = [null, true].includes(insecureFieldValue) ? 1 : "";
   let hy2Dict = {
-    "upmbps": upmbps,
-    "downmbps": downmbps,
-    "obfs": obfs,
+    upmbps,
+    downmbps,
+    obfs,
     "obfs-password": obfs_password,
-    "sni": sni,
-    "insecure": insecure
+    sni,
+    insecure
   };
   const filteredParams = Object.fromEntries(
     Object.entries(hy2Dict).filter(([key, value]) => value !== "" && value !== null && value !== void 0)
@@ -2807,21 +2807,21 @@ function parse_vless(outbounds_n) {
   }
   let fp = findFieldValue(outbounds_n, "fingerprint") || findFieldValue(outbounds_n, "client-fingerprint") || "";
   let vlessDict = {
-    "encryption": encryption,
+    encryption,
     // 加密方式
-    "flow": flow,
-    "security": tls_security,
+    flow,
+    security: tls_security,
     // 传输层安全(TLS)
-    "sni": serverName,
-    "fp": fp,
-    "pbk": public_key,
-    "sid": short_id,
-    "type": network,
+    sni: serverName,
+    fp,
+    pbk: public_key,
+    sid: short_id,
+    type: network,
     // 传输协议(network)
-    "host": host,
+    host,
     // 伪装域名(host)
-    "path": path,
-    "headerType": ""
+    path,
+    headerType: ""
     // 伪装类型(type)
   };
   const filteredParams = Object.fromEntries(
@@ -2852,28 +2852,28 @@ function parse_vmess(outbounds_n) {
   }
   let fp = findFieldValue(outbounds_n, "client-fingerprint") || findFieldValue(outbounds_n, "fingerprint") || "";
   let vmess_dict = {
-    "v": "2",
-    "ps": `[vmess]_${address}:${port}`,
-    "add": address,
-    "port": port,
-    "id": uuid,
-    "aid": alterId,
+    v: "2",
+    ps: `[vmess]_${address}:${port}`,
+    add: address,
+    port,
+    id: uuid,
+    aid: alterId,
     // 额外ID(alterId)
-    "scy": auto_security,
+    scy: auto_security,
     // 加密方式(security)
-    "net": network,
+    net: network,
     // 传输协议(network)
-    "type": type_encryption,
+    type: type_encryption,
     // 伪装类型(type)
-    "host": host,
+    host,
     // 伪装域名(host)
-    "path": path,
+    path,
     // 路径
-    "tls": tls_security,
+    tls: tls_security,
     // 传输层安全(TLS)
-    "sni": serverName,
-    "alpn": "",
-    "fp": fp
+    sni: serverName,
+    alpn: "",
+    fp
   };
   const jsonString = JSON.stringify(vmess_dict);
   const encoder = new TextEncoder();
@@ -2891,7 +2891,7 @@ function parse_shadowsocks(outbounds_n) {
   let method = findFieldValue(outbounds_n, "method") || findFieldValue(outbounds_n, "cipher");
   let password = findFieldValue(outbounds_n, "password");
   let method_with_password = `${method}:${password}`;
-  let base64EncodedString = utf8ToBase64(method_with_password);
+  let base64EncodedString = base64Encode(method_with_password);
   let ss = `ss://${base64EncodedString}@${address}:${port}#[ss]_${address}`;
   return ss;
 }
@@ -2913,14 +2913,14 @@ function parse_trojan(outbounds_n) {
     tls_security = "tls";
   }
   let trojanDict = {
-    "security": tls_security,
-    "allowInsecure": 1,
-    "sni": sni,
-    "fp": fp,
-    "type": network,
-    "host": host,
-    "alpn": alpn,
-    "path": path
+    security: tls_security,
+    allowInsecure: 1,
+    sni,
+    fp,
+    type: network,
+    host,
+    alpn,
+    path
   };
   const filteredParams = Object.fromEntries(
     Object.entries(trojanDict).filter(([key, value]) => value !== "" && value !== null && value !== void 0)
@@ -2948,11 +2948,11 @@ function parse_tuic(outbounds_n) {
     alpn = alpnValue.join(",");
   }
   let tuicDict = {
-    "congestion_control": congestion_controller,
-    "udp_relay_mode": udp_relay_mode,
-    "alpn": alpn,
-    "sni": sni,
-    "allow_insecure": 1
+    congestion_control: congestion_controller,
+    udp_relay_mode,
+    alpn,
+    sni,
+    allow_insecure: 1
   };
   const filteredParams = Object.fromEntries(
     Object.entries(tuicDict).filter(([key, value]) => value !== "" && value !== null && value !== void 0)
@@ -2982,8 +2982,8 @@ async function fetchWebPageContent(url) {
     if (!response.ok) {
       throw new Error(`\u83B7\u53D6\u5931\u8D25: ${response.status}`);
     }
-    let content = await response.text();
-    return content.replace(/!<str>/g, "");
+    let content = (await response.text()).replace(/!<str>/g, "");
+    return stripHtmlTags(content);
   } catch (error) {
     console.error(`\u83B7\u53D6${url} \u7F51\u9875\u5185\u5BB9\u5931\u8D25: ${error.message}`);
     return {};
@@ -3025,17 +3025,17 @@ async function fetchAndProcessUrl(url) {
       return hy2;
     } else if (server && auth && alpn && upmbps !== null && downmbps !== null) {
       let hysteriaDict = {
-        "upmbps": upmbps,
-        "downmbps": downmbps,
-        "obfs": "xplus",
-        "obfsParam": obfsParam,
-        "auth": auth,
-        "protocol": protocol,
-        "insecure": insecure,
-        "peer": peer,
-        "alpn": alpn,
-        "recv_window": recv_window,
-        "recv_window_conn": recv_window_conn
+        upmbps,
+        downmbps,
+        obfs: "xplus",
+        obfsParam,
+        auth,
+        protocol,
+        insecure,
+        peer,
+        alpn,
+        recv_window,
+        recv_window_conn
       };
       if (hysteriaDict["obfsParam"] === "") {
         delete hysteriaDict["obfs"];
@@ -3102,11 +3102,29 @@ async function fetchAndProcessUrl(url) {
     return uniqueArray;
   }
 }
-function utf8ToBase64(str2) {
+function stripHtmlTags(str2) {
+  const entities = {
+    "&lt;": "<",
+    "&gt;": ">"
+    // .....
+  };
+  const regex = new RegExp(
+    "&(" + Object.keys(entities).map((e) => e.slice(1, -1)).join("|") + ");",
+    "g"
+  );
+  let replaced = str2.replace(regex, (match) => entities[match]);
+  return replaced.replace(/<[^>]*>/g, "");
+}
+function base64Encode(str2) {
   const encoder = new TextEncoder();
-  const data = encoder.encode(str2);
-  const base64 = btoa(String.fromCharCode(...new Uint8Array(data)));
-  return base64;
+  const uint8Array = encoder.encode(str2);
+  const chunkSize = 32768;
+  let binary2 = "";
+  for (let i = 0; i < uint8Array.length; i += chunkSize) {
+    const chunk = uint8Array.subarray(i, i + chunkSize);
+    binary2 += String.fromCharCode.apply(null, chunk);
+  }
+  return btoa(binary2);
 }
 var targetUrls = [
   // ChromeGo/EdgeGo的订阅链接(已剔除内容重复的订阅链接)
@@ -3141,9 +3159,7 @@ async function processUrls(targetUrls2) {
       const promise = Promise.resolve().then(() => iteratorFn(item));
       results2.push(promise);
       if (executing.length < poolLimit) {
-        const executingPromise = promise.then(
-          () => executing.splice(executing.indexOf(executingPromise), 1)
-        );
+        const executingPromise = promise.then(() => executing.splice(executing.indexOf(executingPromise), 1));
         executing.push(executingPromise);
       } else {
         await Promise.race(executing);
