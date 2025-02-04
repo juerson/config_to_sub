@@ -227,13 +227,7 @@ function parse_vmess(outbounds_n) {
 	// 将对象转换为 JSON 字符串（方便后面进行base64编码）
 	const jsonString = JSON.stringify(vmess_dict);
 
-	/*
-		由于btoa主要用于处理 Latin-1 字符串，如果字符串包含非 Latin-1 字符（比如 Unicode 字符），
-		要编码成Base64字符串，就使用 TextEncoder 和 Uint8Array。
-	*/
-	const encoder = new TextEncoder();
-	const uint8Array = encoder.encode(jsonString);
-	const base64EncodedString = btoa(String.fromCharCode.apply(null, uint8Array));
+	const base64EncodedString = base64Encode(jsonString);
 	const vmess = `vmess://${base64EncodedString}`;
 
 	return vmess;
@@ -341,6 +335,45 @@ function parse_tuic(outbounds_n) {
 	return tuic;
 }
 
+// ------------------------------------- 判断是否为mieru或juicity的代理 -------------------------------------
+
+function isJuicity(jsonObject) {
+	let juicity_listen = findFieldValue(jsonObject, 'listen');
+	let juicity_server = findFieldValue(jsonObject, 'server');
+	let juicity_uuid = findFieldValue(jsonObject, 'uuid');
+	let juicity_password = findFieldValue(jsonObject, 'password');
+	let juicity_sni = findFieldValue(jsonObject, 'sni');
+	let juicity_allow_insecure = findFieldValue(jsonObject, 'allow_insecure');
+	let juicity_congestion_control = findFieldValue(jsonObject, 'congestion_control');
+
+	if (
+		juicity_listen &&
+		juicity_server &&
+		juicity_uuid &&
+		juicity_password &&
+		juicity_sni &&
+		juicity_allow_insecure &&
+		juicity_congestion_control
+	) {
+		return true;
+	} else {
+		return false;
+	}
+}
+
+function isMieru(jsonObject) {
+	let mieru_exist_profiles = Array.isArray(findFieldValue(jsonObject, 'profiles'));
+	let mieru_exist_portBindings = Array.isArray(findFieldValue(jsonObject, 'portBindings'));
+	let mieru_ipAddress = findFieldValue(jsonObject, 'ipAddress');
+	let mieru_rpcPort = findFieldValue(jsonObject, 'rpcPort');
+	let mieru_activeProfile = findFieldValue(jsonObject, 'activeProfile');
+	if (mieru_exist_profiles && mieru_exist_portBindings && mieru_ipAddress && mieru_rpcPort && mieru_activeProfile) {
+		return true;
+	} else {
+		return false;
+	}
+}
+
 // ------------------------------------------- 递归查找字段对应的值 ------------------------------------------
 
 function findFieldValue(obj, targetField) {
@@ -400,8 +433,16 @@ async function fetchAndProcessUrl(url) {
 	if (outbounds === null && jsonObject) {
 		/** 处理一个节点 */
 
+		// mieru
+		let is_mieru = isMieru(jsonObject);
+		if (is_mieru) return ''; // 丢弃
+
+		// juicity
+		let is_juicity = isJuicity(jsonObject);
+		if (is_juicity) return ''; // 丢弃
+
 		// hy2
-		let server = findFieldValue(jsonObject, 'server');
+		let server = findFieldValue(jsonObject, 'server').replace(/,.*$/, ''); // 如果字符串中含有逗号，就删除逗号及其后面的字符
 		let pwd_auth = findFieldValue(jsonObject, 'auth');
 		let sni = findFieldValue(jsonObject, 'sni');
 
