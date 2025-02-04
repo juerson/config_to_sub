@@ -629,14 +629,14 @@ function base64Encode(str) {
  */
 const targetUrls = [
 	// ChromeGo/EdgeGo的订阅链接(已剔除内容重复的订阅链接)
-	// 'https://fastly.jsdelivr.net/gh/Alvin9999/pac2@latest/quick/4/config.yaml',
-	// 'https://fastly.jsdelivr.net/gh/Alvin9999/pac2@latest/quick/config.yaml',
-	// 'https://fastly.jsdelivr.net/gh/Alvin9999/pac2@latest/singbox/config.json',
-	// 'https://gitlab.com/free9999/ipupdate/-/raw/master/singbox/config.json',
-	// 'https://gitlab.com/free9999/ipupdate/-/raw/master/hysteria/2/config.json',
-	// 'https://gitlab.com/free9999/ipupdate/-/raw/master/hysteria2/2/config.json',
-	// 'https://fastly.jsdelivr.net/gh/Alvin9999/PAC@latest/naiveproxy/config.json',
-	// 'https://gitlab.com/free9999/ipupdate/-/raw/master/naiveproxy/config.json',
+	'https://fastly.jsdelivr.net/gh/Alvin9999/pac2@latest/quick/4/config.yaml',
+	'https://fastly.jsdelivr.net/gh/Alvin9999/pac2@latest/quick/config.yaml',
+	'https://fastly.jsdelivr.net/gh/Alvin9999/pac2@latest/singbox/config.json',
+	'https://gitlab.com/free9999/ipupdate/-/raw/master/singbox/config.json',
+	'https://gitlab.com/free9999/ipupdate/-/raw/master/hysteria/2/config.json',
+	'https://gitlab.com/free9999/ipupdate/-/raw/master/hysteria2/2/config.json',
+	'https://fastly.jsdelivr.net/gh/Alvin9999/PAC@latest/naiveproxy/config.json',
+	'https://gitlab.com/free9999/ipupdate/-/raw/master/naiveproxy/config.json',
 	// 也可以添加其它来源且数据格式为json或yaml的订阅链接
 	'https://raw.githubusercontent.com/aiboboxx/clashfree/main/clash.yml',
 ];
