@@ -3033,7 +3033,7 @@ async function fetchAndProcessUrl(url) {
     let is_juicity = isJuicity(jsonObject);
     if (is_juicity)
       return "";
-    let server = findFieldValue(jsonObject, "server").replace(/,.*$/, "");
+    let server = findFieldValue(jsonObject, "server")?.replace(/,.*$/, "") || "";
     let pwd_auth = findFieldValue(jsonObject, "auth");
     let sni = findFieldValue(jsonObject, "sni");
     let insecureFieldValue = findFieldValue(jsonObject, "insecure");

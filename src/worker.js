@@ -442,7 +442,7 @@ async function fetchAndProcessUrl(url) {
 		if (is_juicity) return ''; // 丢弃
 
 		// hy2
-		let server = findFieldValue(jsonObject, 'server').replace(/,.*$/, ''); // 如果字符串中含有逗号，就删除逗号及其后面的字符
+		let server = findFieldValue(jsonObject, 'server')?.replace(/,.*$/, '') || ''; // 如果字符串中含有逗号，就删除逗号及其后面的字符
 		let pwd_auth = findFieldValue(jsonObject, 'auth');
 		let sni = findFieldValue(jsonObject, 'sni');
 
