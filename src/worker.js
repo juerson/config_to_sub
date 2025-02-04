@@ -11,13 +11,12 @@ function parse_hysteria(outbounds_n) {
 
 	let upmbps_str = findFieldValue(outbounds_n, 'up_mbps') || findFieldValue(outbounds_n, 'up');
 	let downmbps_str = findFieldValue(outbounds_n, 'down_mbps') || findFieldValue(outbounds_n, 'down');
-
 	// 提取字符串中的数字，然后转换为数字类型
-	let upmbps = parseInt(String(upmbps_str).replace(/\D/g, ''), 10) || 0;
-	let downmbps = parseInt(String(downmbps_str).replace(/\D/g, ''), 10) || 0;
-
-	let auth = findFieldValue(outbounds_n, 'auth_str') || findFieldValue(outbounds_n, 'auth-str');
-	let peer = findFieldValue(outbounds_n, 'server_name') || findFieldValue(outbounds_n, 'sni') || '';
+	let upmbps = parseInt(String(upmbps_str).replace(/\D/g, ''), 10) || 0; // 上传速度
+	let downmbps = parseInt(String(downmbps_str).replace(/\D/g, ''), 10) || 0; // 下载速度
+	let obfsParam = findFieldValue(outbounds_n, 'obfs') || ''; // 混淆密码
+	let auth = findFieldValue(outbounds_n, 'auth_str') || findFieldValue(outbounds_n, 'auth-str'); // 认证有效载荷
+	let peer = findFieldValue(outbounds_n, 'server_name') || findFieldValue(outbounds_n, 'sni') || ''; // SNI
 
 	let protocolValue = findFieldValue(outbounds_n, 'protocol');
 	let protocol = protocolValue !== 'hysteria' ? protocolValue : '';
@@ -36,6 +35,7 @@ function parse_hysteria(outbounds_n) {
 	let hysteriaDict = {
 		upmbps: upmbps,
 		downmbps: downmbps,
+		obfsParam: obfsParam,
 		auth: auth,
 		protocol: protocol,
 		insecure: insecure,

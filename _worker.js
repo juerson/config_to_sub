@@ -2705,6 +2705,7 @@ function parse_hysteria(outbounds_n) {
   let downmbps_str = findFieldValue(outbounds_n, "down_mbps") || findFieldValue(outbounds_n, "down");
   let upmbps = parseInt(String(upmbps_str).replace(/\D/g, ""), 10) || 0;
   let downmbps = parseInt(String(downmbps_str).replace(/\D/g, ""), 10) || 0;
+  let obfsParam = findFieldValue(outbounds_n, "obfs") || "";
   let auth = findFieldValue(outbounds_n, "auth_str") || findFieldValue(outbounds_n, "auth-str");
   let peer = findFieldValue(outbounds_n, "server_name") || findFieldValue(outbounds_n, "sni") || "";
   let protocolValue = findFieldValue(outbounds_n, "protocol");
@@ -2721,6 +2722,7 @@ function parse_hysteria(outbounds_n) {
   let hysteriaDict = {
     upmbps,
     downmbps,
+    obfsParam,
     auth,
     protocol,
     insecure,
