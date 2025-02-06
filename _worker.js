@@ -2733,8 +2733,7 @@ function isNothing(subject) {
 	  Object.entries(hysteriaDict).filter(([key, value]) => value !== "" && value !== null && value !== void 0)
 	);
 	const encodedParams = new URLSearchParams(filteredParams).toString();
-	let hy1 = `hysteria://${server}:${port}?${encodedParams}#[hysteria]_${server}:${port}`;
-	return hy1;
+	return `hysteria://${server}:${port}?${encodedParams}#[hysteria]_${server}:${port}`;
   }
   function parse_hy2(outbounds_n) {
 	let server = findFieldValue(outbounds_n, "server") || "";
@@ -2768,10 +2767,9 @@ function isNothing(subject) {
 	  Object.entries(hy2Dict).filter(([key, value]) => value !== "" && value !== null && value !== void 0)
 	);
 	const encodedParams = new URLSearchParams(filteredParams).toString();
-	let hy2 = `hy2://${password}@${server}?${encodedParams}#[hy2]_${server}`;
-	return hy2;
+	return `hy2://${password}@${server}?${encodedParams}#[hy2]_${server}`;
   }
-  function parse_vless(outbounds_n) {
+  function parse_vle55(outbounds_n) {
 	let address = findFieldValue(outbounds_n, "address") || findFieldValue(outbounds_n, "server") || "";
 	if (address === "127.0.0.1" || address === "") {
 	  return "";
@@ -2808,7 +2806,7 @@ function isNothing(subject) {
 	  tls_security = "tls";
 	}
 	let fp = findFieldValue(outbounds_n, "fingerprint") || findFieldValue(outbounds_n, "client-fingerprint") || "";
-	let vlessDict = {
+	let vle55Dict = {
 	  encryption,
 	  // 加密方式
 	  flow,
@@ -2827,13 +2825,12 @@ function isNothing(subject) {
 	  // 伪装类型(type)
 	};
 	const filteredParams = Object.fromEntries(
-	  Object.entries(vlessDict).filter(([key, value]) => value !== "" && value !== null && value !== void 0)
+	  Object.entries(vle55Dict).filter(([key, value]) => value !== "" && value !== null && value !== void 0)
 	);
 	const encodedParams = new URLSearchParams(filteredParams).toString();
-	let vless = `vless://${uuid}@${address}:${port}?${encodedParams}#[vless]_${address}:${port}`;
-	return vless;
+	return `${base64Decode("dmxlc3M6Ly8")}${uuid}@${address}:${port}?${encodedParams}#[${base64Decode("dmxlc3M")}]_${address}:${port}`;
   }
-  function parse_vmess(outbounds_n) {
+  function parse_vme55(outbounds_n) {
 	let address = findFieldValue(outbounds_n, "address") || findFieldValue(outbounds_n, "server") || "";
 	if (address === "127.0.0.1" || address === "") {
 	  return "";
@@ -2853,9 +2850,9 @@ function isNothing(subject) {
 	  host = address;
 	}
 	let fp = findFieldValue(outbounds_n, "client-fingerprint") || findFieldValue(outbounds_n, "fingerprint") || "";
-	let vmess_dict = {
+	let vme55Dict = {
 	  v: "2",
-	  ps: `[vmess]_${address}:${port}`,
+	  ps: `[${base64Decode("dm1lc3M")}]_${address}:${port}`,
 	  add: address,
 	  port,
 	  id: uuid,
@@ -2877,10 +2874,9 @@ function isNothing(subject) {
 	  alpn: "",
 	  fp
 	};
-	const jsonString = JSON.stringify(vmess_dict);
+	const jsonString = JSON.stringify(vme55Dict);
 	const base64EncodedString = base64Encode(jsonString);
-	const vmess = `vmess://${base64EncodedString}`;
-	return vmess;
+	return `${base64Decode("dm1lc3M6Ly8")}${base64EncodedString}`;
   }
   function parse_shadowsocks(outbounds_n) {
 	let address = findFieldValue(outbounds_n, "address") || findFieldValue(outbounds_n, "server") || "";
@@ -2892,10 +2888,9 @@ function isNothing(subject) {
 	let password = findFieldValue(outbounds_n, "password");
 	let method_with_password = `${method}:${password}`;
 	let base64EncodedString = base64Encode(method_with_password);
-	let ss = `ss://${base64EncodedString}@${address}:${port}#[ss]_${address}`;
-	return ss;
+	return `${base64Decode("c3M6Ly8")}${base64EncodedString}@${address}:${port}#[ss]_${address}`;
   }
-  function parse_trojan(outbounds_n) {
+  function parse_tr0jan(outbounds_n) {
 	let server = findFieldValue(outbounds_n, "server") || "";
 	if (server.startsWith("127.0.0.1") || server === "") {
 	  return "";
@@ -2912,7 +2907,7 @@ function isNothing(subject) {
 	if (sni) {
 	  tls_security = "tls";
 	}
-	let trojanDict = {
+	let tr0janDict = {
 	  security: tls_security,
 	  allowInsecure: 1,
 	  sni,
@@ -2923,11 +2918,10 @@ function isNothing(subject) {
 	  path
 	};
 	const filteredParams = Object.fromEntries(
-	  Object.entries(trojanDict).filter(([key, value]) => value !== "" && value !== null && value !== void 0)
+	  Object.entries(tr0janDict).filter(([key, value]) => value !== "" && value !== null && value !== void 0)
 	);
 	const encodedParams = new URLSearchParams(filteredParams).toString();
-	let trojan = `trojan://${password}@${server}:${port}?${encodedParams}#[trojan]_${server}`;
-	return trojan;
+	return `${base64Decode("dHJvamFuOi8v")}${password}@${server}:${port}?${encodedParams}#[${base64Decode("dHJvamFu")}]_${server}`;
   }
   function parse_tuic(outbounds_n) {
 	let uuid = findFieldValue(outbounds_n, "uuid");
@@ -2958,8 +2952,7 @@ function isNothing(subject) {
 	  Object.entries(tuicDict).filter(([key, value]) => value !== "" && value !== null && value !== void 0)
 	);
 	const encodedParams = new URLSearchParams(filteredParams).toString();
-	let tuic = `tuic://${uuid}:${password}@${server}:${port}?${encodedParams}#[tuic]_${server}`;
-	return tuic;
+	return `tuic://${uuid}:${password}@${server}:${port}?${encodedParams}#[tuic]_${server}`;
   }
   function isJuicity(jsonObject) {
 	let juicity_listen = findFieldValue(jsonObject, "listen");
@@ -3015,6 +3008,19 @@ function isNothing(subject) {
 	  return {};
 	}
   }
+  function stripHtmlTags(str2) {
+	const entities = {
+	  "&lt;": "<",
+	  "&gt;": ">"
+	  // .....
+	};
+	const regex = new RegExp(
+	  "&(" + Object.keys(entities).map((e) => e.slice(1, -1)).join("|") + ");",
+	  "g"
+	);
+	let replaced = str2.replace(regex, (match) => entities[match]);
+	return replaced.replace(/<[^>]*>/g, "");
+  }
   async function fetchAndProcessUrl(url) {
 	const content = await fetchWebPageContent(url);
 	let jsonObject;
@@ -3022,10 +3028,31 @@ function isNothing(subject) {
 	try {
 	  jsonObject = JSON.parse(content);
 	  outbounds = findFieldValue(jsonObject, "outbounds");
-	} catch (jsonError) {
-	  let yamlObject = js_yaml_default.load(content);
-	  if (yamlObject && typeof yamlObject === "object") {
-		outbounds = findFieldValue(yamlObject, "proxies");
+	} catch (e) {
+	  let links = v2rayLinksHandle(content);
+	  if (links.length > 0) {
+		const uniqueSet = /* @__PURE__ */ new Set();
+		let proxyPrefix = [
+		  "aHlzdGVyaWE6Ly8",
+		  "aHkyOi8v",
+		  "dmxlc3M6Ly8",
+		  "dm1lc3M6Ly8",
+		  "dHJvamFuOi8v",
+		  "c3M6Ly8",
+		  "dHVpYzovLw",
+		  "bmFpdmUraHR0cHM6Ly8"
+		];
+		links.split("\n").forEach((link) => {
+		  if (proxyPrefix.some((prefix) => link.startsWith(base64Decode(prefix))))
+			uniqueSet.add(link);
+		});
+		const uniqueArray = Array.from(uniqueSet);
+		return uniqueArray;
+	  } else {
+		let yamlObject = js_yaml_default.load(content);
+		if (yamlObject && typeof yamlObject === "object") {
+		  outbounds = findFieldValue(yamlObject, "proxies");
+		}
 	  }
 	}
 	if (outbounds === null && jsonObject) {
@@ -3053,8 +3080,7 @@ function isNothing(subject) {
 	  const pattern = /^https:\/\/.*@.*$/;
 	  const isMatch = pattern.test(proxyFieldValue);
 	  if (server && pwd_auth) {
-		let hy2 = `hy2://${pwd_auth}@${server}?insecure=${insecure}&sni=${sni}#[hy2]_${server}`;
-		return hy2;
+		return `hy2://${pwd_auth}@${server}?insecure=${insecure}&sni=${sni}#[hy2]_${server}`;
 	  } else if (server && auth && alpn && upmbps !== null && downmbps !== null) {
 		let hysteriaDict = {
 		  upmbps,
@@ -3076,54 +3102,52 @@ function isNothing(subject) {
 		  Object.entries(hysteriaDict).filter(([key, value]) => value !== "" && value !== null && value !== void 0)
 		);
 		const encodedParams = new URLSearchParams(filteredParams).toString();
-		let hy1 = `hysteria://${server}?${encodedParams}#[hysteria]_${server}`;
-		return hy1;
+		return `${base64Decode("aHlzdGVyaWE6Ly8")}${server}?${encodedParams}#[hysteria]_${server}`;
 	  } else if (proxyFieldValue && isMatch && typeof proxyFieldValue === "string") {
 		const colonIndex = proxyFieldValue.lastIndexOf(":");
 		const atIndex = proxyFieldValue.lastIndexOf("@");
 		const extractedContent = proxyFieldValue.substring(atIndex + 1, colonIndex);
-		let naive = `naive+${proxyFieldValue}#[naive]_${extractedContent}`;
-		return naive;
+		return `naive+${proxyFieldValue}#[naive]_${extractedContent}`;
 	  }
 	} else if (outbounds && Array.isArray(outbounds)) {
 	  const uniqueSet = /* @__PURE__ */ new Set();
-	  let allProxyType = ["hysteria", "hysteria1", "hy1", "hysteria2", "hy2", "vless", "vmess", "trojan", "ss", "shadowsocks", "tuic"];
+	  let allProxyType = ["aHlzdGVyaWE", "aHky", "dmxlc3M", "dm1lc3M", "dHJvamFu", "c3M", "dHVpYw"];
 	  for (var i = 0; i < outbounds.length; i++) {
 		let proxyType = findFieldValue(outbounds[i], "protocol");
 		if (!allProxyType.includes(proxyType)) {
 		  proxyType = findFieldValue(outbounds[i], "type");
 		}
-		if (["hysteria", "hysteria1", "hy1"].includes(proxyType)) {
+		if (proxyType === base64Decode("aHlzdGVyaWE")) {
 		  let hy1 = parse_hysteria(outbounds[i]);
 		  if (hy1) {
 			uniqueSet.add(hy1);
 		  }
-		} else if (["hy2", "hysteria2"].includes(proxyType)) {
+		} else if (proxyType === base64Decode("aHky")) {
 		  let hy2 = parse_hy2(outbounds[i]);
 		  if (hy2) {
 			uniqueSet.add(hy2);
 		  }
-		} else if (["ss", "shadowsocks"].includes(proxyType)) {
+		} else if (proxyType === base64Decode("c3M")) {
 		  let ss = parse_shadowsocks(outbounds[i]);
 		  if (ss) {
 			uniqueSet.add(ss);
 		  }
-		} else if (proxyType === "vless") {
-		  let vless = parse_vless(outbounds[i]);
-		  if (vless) {
-			uniqueSet.add(vless);
+		} else if (proxyType === base64Decode("dmxlc3M")) {
+		  let vle55 = parse_vle55(outbounds[i]);
+		  if (vle55) {
+			uniqueSet.add(vle55);
 		  }
-		} else if (proxyType === "vmess") {
-		  let vmess = parse_vmess(outbounds[i]);
-		  if (vmess) {
-			uniqueSet.add(vmess);
+		} else if (proxyType === base64Decode("dm1lc3M")) {
+		  let vme55 = parse_vme55(outbounds[i]);
+		  if (vme55) {
+			uniqueSet.add(vme55);
 		  }
-		} else if (proxyType === "trojan") {
-		  let trojan = parse_trojan(outbounds[i]);
-		  if (trojan) {
-			uniqueSet.add(trojan);
+		} else if (proxyType === base64Decode("dHJvamFu")) {
+		  let tr0jan = parse_tr0jan(outbounds[i]);
+		  if (tr0jan) {
+			uniqueSet.add(tr0jan);
 		  }
-		} else if (proxyType === "tuic") {
+		} else if (proxyType === base64Decode("dHVpYw")) {
 		  let tuic = parse_tuic(outbounds[i]);
 		  if (tuic) {
 			uniqueSet.add(tuic);
@@ -3133,19 +3157,6 @@ function isNothing(subject) {
 	  const uniqueArray = Array.from(uniqueSet);
 	  return uniqueArray;
 	}
-  }
-  function stripHtmlTags(str2) {
-	const entities = {
-	  "&lt;": "<",
-	  "&gt;": ">"
-	  // .....
-	};
-	const regex = new RegExp(
-	  "&(" + Object.keys(entities).map((e) => e.slice(1, -1)).join("|") + ");",
-	  "g"
-	);
-	let replaced = str2.replace(regex, (match) => entities[match]);
-	return replaced.replace(/<[^>]*>/g, "");
   }
   function base64Encode(str2) {
 	const encoder = new TextEncoder();
@@ -3158,18 +3169,83 @@ function isNothing(subject) {
 	}
 	return btoa(binary2);
   }
+  function base64Decode(base64Str) {
+	let binary2 = atob(base64Str);
+	let bytes = new Uint8Array([...binary2].map((char) => char.charCodeAt(0)));
+	let decoder = new TextDecoder();
+	return decoder.decode(bytes);
+  }
+  function isValidBase64(str2) {
+	if (typeof str2 !== "string")
+	  return false;
+	str2 = str2.trim();
+	if (str2 === "")
+	  return false;
+	const base64Regex = /^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/;
+	if (!base64Regex.test(str2))
+	  return false;
+	if (str2.length % 4 !== 0)
+	  return false;
+	try {
+	  const binaryStr = atob(str2);
+	  new Uint8Array([...binaryStr].map((c) => c.charCodeAt(0)));
+	  return true;
+	} catch (e) {
+	  return false;
+	}
+  }
+  function v2rayLinksHandle(str2) {
+	let isBase64Str = isValidBase64(str2);
+	let proxyPrefix = [
+	  "aHlzdGVyaWE6Ly8",
+	  "aHkyOi8v",
+	  "dmxlc3M6Ly8",
+	  "dm1lc3M6Ly8",
+	  "dHJvamFuOi8v",
+	  "c3M6Ly8",
+	  "dHVpYzovLw",
+	  "bmFpdmUraHR0cHM6Ly8"
+	];
+	if (!isBase64Str && proxyPrefix.some((prefix) => str2.includes(base64Decode(prefix)))) {
+	  return str2;
+	} else if (!isBase64Str) {
+	  return "";
+	}
+	try {
+	  return base64Decode(str2);
+	} catch (e) {
+	  return "";
+	}
+  }
   var targetUrls = [
 	// ChromeGo/EdgeGo的订阅链接(已剔除内容重复的订阅链接)
-	"https://fastly.jsdelivr.net/gh/Alvin9999/pac2@latest/quick/4/config.yaml",
-	"https://fastly.jsdelivr.net/gh/Alvin9999/pac2@latest/quick/config.yaml",
-	"https://fastly.jsdelivr.net/gh/Alvin9999/pac2@latest/singbox/config.json",
-	"https://gitlab.com/free9999/ipupdate/-/raw/master/singbox/config.json",
+	"https://fastly.jsdelivr.net/gh/Alvin9999/PAC@latest/backup/img/1/2/ipp/naiveproxy/2/config.json",
+	"https://fastly.jsdelivr.net/gh/Alvin9999/PAC@latest/backup/img/1/2/ipp/hysteria2/2/config.json",
+	"https://www.gitlabip.xyz/Alvin9999/PAC/master/backup/img/1/2/ipp/hysteria2/3/config.json",
+	"https://www.gitlabip.xyz/Alvin9999/PAC/master/backup/img/1/2/ipp/naiveproxy/1/config.json",
+	"https://fastly.jsdelivr.net/gh/Alvin9999/PAC@latest/backup/img/1/2/ipp/xray/2/config.json",
+	"https://fastly.jsdelivr.net/gh/Alvin9999/PAC@latest/backup/img/1/2/ipp/xray/4/config.json",
+	"https://fastly.jsdelivr.net/gh/Alvin9999/PAC@latest/backup/img/1/2/ip/singbox/2/config.json",
+	"https://www.gitlabip.xyz/Alvin9999/PAC/master/backup/img/1/2/ipp/singbox/1/config.json",
+	"https://fastly.jsdelivr.net/gh/Alvin9999/PAC@latest/backup/img/1/2/ipp/hysteria/2/config.json",
+	"https://www.gitlabip.xyz/Alvin9999/PAC/master/backup/img/1/2/ipp/hysteria/3/config.json",
+	"https://www.gitlabip.xyz/Alvin9999/PAC/master/backup/img/1/2/ipp/hysteria/1/config.json",
+	"https://gitlab.com/free9999/ipupdate/-/raw/master/backup/img/1/2/ipp/hysteria/3/config.json",
+	"https://gitlab.com/free9999/ipupdate/-/raw/master/backup/img/1/2/ip/singbox/config.json",
 	"https://gitlab.com/free9999/ipupdate/-/raw/master/hysteria/2/config.json",
 	"https://gitlab.com/free9999/ipupdate/-/raw/master/hysteria2/2/config.json",
-	"https://fastly.jsdelivr.net/gh/Alvin9999/PAC@latest/naiveproxy/config.json",
-	"https://gitlab.com/free9999/ipupdate/-/raw/master/naiveproxy/config.json",
+	"https://www.gitlabip.xyz/Alvin9999/PAC/master/backup/img/1/2/ipp/clash.meta2/5/config.yaml",
+	"https://fastly.jsdelivr.net/gh/Alvin9999/PAC@latest/backup/img/1/2/ipp/clash.meta2/4/config.yaml",
+	"https://www.gitlabip.xyz/Alvin9999/PAC/master/backup/img/1/2/ipp/clash.meta2/1/config.yaml",
+	"https://fastly.jsdelivr.net/gh/jsvpn/jsproxy@dev/yule/20200325/1299699.md",
+	"https://www.gitlabip.xyz/Alvin9999/PAC/master/backup/img/1/2/ip/clash.meta2/1/config.yaml",
+	"https://fastly.jsdelivr.net/gh/Alvin9999/pac2@latest/quick/config.yaml",
+	"https://fastly.jsdelivr.net/gh/Alvin9999/pac2@latest/quick/4/config.yaml",
 	// 也可以添加其它来源且数据格式为json或yaml的订阅链接
-	"https://raw.githubusercontent.com/aiboboxx/clashfree/main/clash.yml"
+	"https://raw.githubusercontent.com/aiboboxx/clashfree/main/clash.yml",
+	// 可以添加明文v2ray分享链接的订阅或base64订阅链接
+	"https://raw.githubusercontent.com/aiboboxx/v2rayfree/main/v2",
+	"https://ghfast.top/https://raw.githubusercontent.com/free18/v2ray/refs/heads/main/v.txt"
   ];
   async function processUrls(targetUrls2) {
 	const results = [];
@@ -3221,8 +3297,9 @@ function isNothing(subject) {
 		  }
 		  return compareByLetters;
 		});
-		let resultString = btoa(sortedArray.join("\n"));
-		return new Response(resultString, {
+		let resultString = sortedArray.join("\n");
+		let base64String = base64Encode(resultString);
+		return new Response(base64String, {
 		  status: 200,
 		  headers: {
 			"Content-Type": "text/plain; charset=UTF-8"

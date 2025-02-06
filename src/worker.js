@@ -48,10 +48,8 @@ function parse_hysteria(outbounds_n) {
 	);
 	// 进行 URL 参数编码
 	const encodedParams = new URLSearchParams(filteredParams).toString();
-	// 拼接链接
-	let hy1 = `hysteria://${server}:${port}?${encodedParams}#[hysteria]_${server}:${port}`;
 
-	return hy1;
+	return `hysteria://${server}:${port}?${encodedParams}#[hysteria]_${server}:${port}`;
 }
 
 // ------------------------------------------ 解析和构建 hy2 节点 -------------------------------------------
@@ -99,14 +97,12 @@ function parse_hy2(outbounds_n) {
 	// 进行 URL 参数编码
 	const encodedParams = new URLSearchParams(filteredParams).toString();
 
-	let hy2 = `hy2://${password}@${server}?${encodedParams}#[hy2]_${server}`;
-
-	return hy2;
+	return `hy2://${password}@${server}?${encodedParams}#[hy2]_${server}`;
 }
 
 // ----------------------------------------- 解析和构建 vless 节点 ------------------------------------------
 
-function parse_vless(outbounds_n) {
+function parse_vle55(outbounds_n) {
 	let address = findFieldValue(outbounds_n, 'address') || findFieldValue(outbounds_n, 'server') || '';
 	if (address === '127.0.0.1' || address === '') {
 		return '';
@@ -146,7 +142,7 @@ function parse_vless(outbounds_n) {
 		tls_security = 'tls';
 	}
 	let fp = findFieldValue(outbounds_n, 'fingerprint') || findFieldValue(outbounds_n, 'client-fingerprint') || '';
-	let vlessDict = {
+	let vle55Dict = {
 		encryption: encryption, // 加密方式
 		flow: flow,
 		security: tls_security, // 传输层安全(TLS)
@@ -162,19 +158,17 @@ function parse_vless(outbounds_n) {
 
 	// 过滤掉值为空的键值对
 	const filteredParams = Object.fromEntries(
-		Object.entries(vlessDict).filter(([key, value]) => value !== '' && value !== null && value !== undefined)
+		Object.entries(vle55Dict).filter(([key, value]) => value !== '' && value !== null && value !== undefined)
 	);
 	// 进行 URL 参数编码
 	const encodedParams = new URLSearchParams(filteredParams).toString();
 
-	let vless = `vless://${uuid}@${address}:${port}?${encodedParams}#[vless]_${address}:${port}`;
-
-	return vless;
+	return `${base64Decode('dmxlc3M6Ly8')}${uuid}@${address}:${port}?${encodedParams}#[${base64Decode('dmxlc3M')}]_${address}:${port}`;
 }
 
 // ----------------------------------------- 解析和构建 vmess 节点 ------------------------------------------
 
-function parse_vmess(outbounds_n) {
+function parse_vme55(outbounds_n) {
 	let address = findFieldValue(outbounds_n, 'address') || findFieldValue(outbounds_n, 'server') || '';
 	if (address === '127.0.0.1' || address === '') {
 		return '';
@@ -207,9 +201,9 @@ function parse_vmess(outbounds_n) {
 		host = address;
 	}
 	let fp = findFieldValue(outbounds_n, 'client-fingerprint') || findFieldValue(outbounds_n, 'fingerprint') || '';
-	let vmess_dict = {
+	let vme55Dict = {
 		v: '2',
-		ps: `[vmess]_${address}:${port}`,
+		ps: `[${base64Decode('dm1lc3M')}]_${address}:${port}`,
 		add: address,
 		port: port,
 		id: uuid,
@@ -225,12 +219,11 @@ function parse_vmess(outbounds_n) {
 		fp: fp,
 	};
 	// 将对象转换为 JSON 字符串（方便后面进行base64编码）
-	const jsonString = JSON.stringify(vmess_dict);
+	const jsonString = JSON.stringify(vme55Dict);
 
 	const base64EncodedString = base64Encode(jsonString);
-	const vmess = `vmess://${base64EncodedString}`;
 
-	return vmess;
+	return `${base64Decode('dm1lc3M6Ly8')}${base64EncodedString}`;
 }
 
 // -------------------------------------- 解析和构建 shadowsocks 节点 ---------------------------------------
@@ -247,14 +240,12 @@ function parse_shadowsocks(outbounds_n) {
 	let method_with_password = `${method}:${password}`;
 	let base64EncodedString = base64Encode(method_with_password);
 
-	let ss = `ss://${base64EncodedString}@${address}:${port}#[ss]_${address}`;
-
-	return ss;
+	return `${base64Decode('c3M6Ly8')}${base64EncodedString}@${address}:${port}#[ss]_${address}`;
 }
 
 // ----------------------------------------- 解析和构建 trojan 节点 -----------------------------------------
 
-function parse_trojan(outbounds_n) {
+function parse_tr0jan(outbounds_n) {
 	let server = findFieldValue(outbounds_n, 'server') || '';
 	if (server.startsWith('127.0.0.1') || server === '') {
 		return '';
@@ -272,7 +263,7 @@ function parse_trojan(outbounds_n) {
 		tls_security = 'tls';
 	}
 
-	let trojanDict = {
+	let tr0janDict = {
 		security: tls_security,
 		allowInsecure: 1,
 		sni: sni,
@@ -285,14 +276,12 @@ function parse_trojan(outbounds_n) {
 
 	// 过滤掉值为空的键值对
 	const filteredParams = Object.fromEntries(
-		Object.entries(trojanDict).filter(([key, value]) => value !== '' && value !== null && value !== undefined)
+		Object.entries(tr0janDict).filter(([key, value]) => value !== '' && value !== null && value !== undefined)
 	);
 	// 进行 URL 参数编码
 	const encodedParams = new URLSearchParams(filteredParams).toString();
 
-	let trojan = `trojan://${password}@${server}:${port}?${encodedParams}#[trojan]_${server}`;
-
-	return trojan;
+	return `${base64Decode('dHJvamFuOi8v')}${password}@${server}:${port}?${encodedParams}#[${base64Decode('dHJvamFu')}]_${server}`;
 }
 
 // ------------------------------------------ 解析和构建 tuic 节点 ------------------------------------------
@@ -330,9 +319,8 @@ function parse_tuic(outbounds_n) {
 	);
 	// 进行 URL 参数编码
 	const encodedParams = new URLSearchParams(filteredParams).toString();
-	let tuic = `tuic://${uuid}:${password}@${server}:${port}?${encodedParams}#[tuic]_${server}`;
 
-	return tuic;
+	return `tuic://${uuid}:${password}@${server}:${port}?${encodedParams}#[tuic]_${server}`;
 }
 
 // ------------------------------------- 判断是否为mieru或juicity的代理 -------------------------------------
@@ -403,7 +391,7 @@ async function fetchWebPageContent(url) {
 			throw new Error(`获取失败: ${response.status}`);
 		}
 
-		// 读取并返回文本内容，同时替换"!<str>"
+		// 读取并返回文本内容，同时替换可能出现的"!<str>"字符
 		let content = (await response.text()).replace(/!<str>/g, '');
 
 		// 去掉HTML标签，包括HTML实体字符
@@ -412,6 +400,28 @@ async function fetchWebPageContent(url) {
 		console.error(`获取${url} 网页内容失败: ${error.message}`);
 		return {};
 	}
+}
+
+// 删除网页内容中多余的HTML标签
+function stripHtmlTags(str) {
+	const entities = {
+		'&lt;': '<',
+		'&gt;': '>',
+		// .....
+	};
+	// 动态生成正则表达式，匹配所有实体
+	const regex = new RegExp(
+		'&(' +
+			Object.keys(entities)
+				.map((e) => e.slice(1, -1))
+				.join('|') +
+			');',
+		'g'
+	);
+	// 替换HTML实体
+	let replaced = str.replace(regex, (match) => entities[match]);
+	// 去掉HTML标签
+	return replaced.replace(/<[^>]*>/g, '');
 }
 
 // ---------------------------------- 去抓取网页、处理节点，返回节点的分享链接 ----------------------------------
@@ -423,10 +433,33 @@ async function fetchAndProcessUrl(url) {
 	try {
 		jsonObject = JSON.parse(content);
 		outbounds = findFieldValue(jsonObject, 'outbounds');
-	} catch (jsonError) {
-		let yamlObject = yaml.load(content); // 使用js-yaml库解析yaml
-		if (yamlObject && typeof yamlObject === 'object') {
-			outbounds = findFieldValue(yamlObject, 'proxies');
+	} catch (e) {
+		let links = v2rayLinksHandle(content);
+		if (links.length > 0) {
+			// 存储多个节点链接
+			const uniqueSet = new Set();
+			// let proxyPrefix = ['hysteria://', 'hy2://', 'vless://', 'vmess://', 'trojan://', 'ss://', 'tuic://', 'naive+https://'];
+			let proxyPrefix = [
+				'aHlzdGVyaWE6Ly8',
+				'aHkyOi8v',
+				'dmxlc3M6Ly8',
+				'dm1lc3M6Ly8',
+				'dHJvamFuOi8v',
+				'c3M6Ly8',
+				'dHVpYzovLw',
+				'bmFpdmUraHR0cHM6Ly8',
+			];
+			links.split('\n').forEach((link) => {
+				if (proxyPrefix.some((prefix) => link.startsWith(base64Decode(prefix)))) uniqueSet.add(link);
+			});
+			// 转换为数组
+			const uniqueArray = Array.from(uniqueSet);
+			return uniqueArray;
+		} else {
+			let yamlObject = yaml.load(content); // 使用js-yaml库解析yaml
+			if (yamlObject && typeof yamlObject === 'object') {
+				outbounds = findFieldValue(yamlObject, 'proxies');
+			}
 		}
 	}
 
@@ -470,9 +503,7 @@ async function fetchAndProcessUrl(url) {
 		if (server && pwd_auth) {
 			// 判断是hy2
 
-			let hy2 = `hy2://${pwd_auth}@${server}?insecure=${insecure}&sni=${sni}#[hy2]_${server}`;
-
-			return hy2;
+			return `hy2://${pwd_auth}@${server}?insecure=${insecure}&sni=${sni}#[hy2]_${server}`;
 		} else if (server && auth && alpn && upmbps !== null && downmbps !== null) {
 			// 判断是hy1
 
@@ -500,9 +531,8 @@ async function fetchAndProcessUrl(url) {
 			// 进行 URL 参数编码
 			const encodedParams = new URLSearchParams(filteredParams).toString();
 
-			let hy1 = `hysteria://${server}?${encodedParams}#[hysteria]_${server}`;
-
-			return hy1;
+			// hy1的节点链接
+			return `${base64Decode('aHlzdGVyaWE6Ly8')}${server}?${encodedParams}#[hysteria]_${server}`;
 		} else if (proxyFieldValue && isMatch && typeof proxyFieldValue === 'string') {
 			// 判断是naive
 
@@ -511,9 +541,8 @@ async function fetchAndProcessUrl(url) {
 			const atIndex = proxyFieldValue.lastIndexOf('@');
 			// 截取 "@" 后到 ":" 之间的内容
 			const extractedContent = proxyFieldValue.substring(atIndex + 1, colonIndex);
-			let naive = `naive+${proxyFieldValue}#[naive]_${extractedContent}`;
 
-			return naive;
+			return `naive+${proxyFieldValue}#[naive]_${extractedContent}`;
 		}
 	} else if (outbounds && Array.isArray(outbounds)) {
 		/** 处理多个节点 */
@@ -521,7 +550,8 @@ async function fetchAndProcessUrl(url) {
 		// 存储多个节点链接
 		const uniqueSet = new Set();
 
-		let allProxyType = ['hysteria', 'hysteria1', 'hy1', 'hysteria2', 'hy2', 'vless', 'vmess', 'trojan', 'ss', 'shadowsocks', 'tuic'];
+		// let allProxyType = ['hysteria', 'hy2', 'vless', 'vmess', 'trojan', 'ss', 'tuic'];
+		let allProxyType = ['aHlzdGVyaWE', 'aHky', 'dmxlc3M', 'dm1lc3M', 'dHJvamFu', 'c3M', 'dHVpYw'];
 		// 遍历数组中的节点
 		for (var i = 0; i < outbounds.length; i++) {
 			let proxyType = findFieldValue(outbounds[i], 'protocol');
@@ -529,43 +559,43 @@ async function fetchAndProcessUrl(url) {
 				proxyType = findFieldValue(outbounds[i], 'type');
 			}
 			// 检查到是hysteria类型的节点
-			if (['hysteria', 'hysteria1', 'hy1'].includes(proxyType)) {
+			if (proxyType === base64Decode('aHlzdGVyaWE')) {
 				let hy1 = parse_hysteria(outbounds[i]);
 				if (hy1) {
 					uniqueSet.add(hy1);
 				}
 				// 检查到是hy2类型的节点
-			} else if (['hy2', 'hysteria2'].includes(proxyType)) {
+			} else if (proxyType === base64Decode('aHky')) {
 				let hy2 = parse_hy2(outbounds[i]);
 				if (hy2) {
 					uniqueSet.add(hy2);
 				}
 				// 检查到是shadowsocks类型的节点
-			} else if (['ss', 'shadowsocks'].includes(proxyType)) {
+			} else if (proxyType === base64Decode('c3M')) {
 				let ss = parse_shadowsocks(outbounds[i]);
 				if (ss) {
 					uniqueSet.add(ss);
 				}
 				// 检查到是vless类型的节点
-			} else if (proxyType === 'vless') {
-				let vless = parse_vless(outbounds[i]);
-				if (vless) {
-					uniqueSet.add(vless);
+			} else if (proxyType === base64Decode('dmxlc3M')) {
+				let vle55 = parse_vle55(outbounds[i]);
+				if (vle55) {
+					uniqueSet.add(vle55);
 				}
 				// 检查到是vmess类型的节点
-			} else if (proxyType === 'vmess') {
-				let vmess = parse_vmess(outbounds[i]);
-				if (vmess) {
-					uniqueSet.add(vmess);
+			} else if (proxyType === base64Decode('dm1lc3M')) {
+				let vme55 = parse_vme55(outbounds[i]);
+				if (vme55) {
+					uniqueSet.add(vme55);
 				}
 				// 检查到是trojan类型的节点
-			} else if (proxyType === 'trojan') {
-				let trojan = parse_trojan(outbounds[i]);
-				if (trojan) {
-					uniqueSet.add(trojan);
+			} else if (proxyType === base64Decode('dHJvamFu')) {
+				let tr0jan = parse_tr0jan(outbounds[i]);
+				if (tr0jan) {
+					uniqueSet.add(tr0jan);
 				}
 				// 检查到是tuic类型的节点
-			} else if (proxyType === 'tuic') {
+			} else if (proxyType === base64Decode('dHVpYw')) {
 				let tuic = parse_tuic(outbounds[i]);
 				if (tuic) {
 					uniqueSet.add(tuic);
@@ -579,29 +609,8 @@ async function fetchAndProcessUrl(url) {
 	}
 }
 
-// 删除字符串中所有HTML标签
-function stripHtmlTags(str) {
-	const entities = {
-		'&lt;': '<',
-		'&gt;': '>',
-		// .....
-	};
-	// 动态生成正则表达式，匹配所有实体
-	const regex = new RegExp(
-		'&(' +
-			Object.keys(entities)
-				.map((e) => e.slice(1, -1))
-				.join('|') +
-			');',
-		'g'
-	);
-	// 替换HTML实体
-	let replaced = str.replace(regex, (match) => entities[match]);
-	// 去掉HTML标签
-	return replaced.replace(/<[^>]*>/g, '');
-}
-
-// 将UTF-8字符串转换为Base64编码
+// ----------------------------------------- base64编码与base64解码 ------------------------------------------
+// base64编码
 function base64Encode(str) {
 	const encoder = new TextEncoder();
 	const uint8Array = encoder.encode(str);
@@ -618,27 +627,108 @@ function base64Encode(str) {
 	return btoa(binary);
 }
 
+// base64解码
+function base64Decode(base64Str) {
+	let binary = atob(base64Str);
+	let bytes = new Uint8Array([...binary].map((char) => char.charCodeAt(0)));
+	let decoder = new TextDecoder();
+	return decoder.decode(bytes);
+}
+
+// 判断是否是有效的Base64编码字符串
+function isValidBase64(str) {
+	if (typeof str !== 'string') return false;
+
+	str = str.trim();
+	if (str === '') return false;
+
+	// Base64正则匹配规则，确保格式正确
+	const base64Regex = /^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/;
+	if (!base64Regex.test(str)) return false;
+
+	// 长度必须是4的倍数
+	if (str.length % 4 !== 0) return false;
+
+	try {
+		// 尝试解码，确保不会报错
+		const binaryStr = atob(str);
+		new Uint8Array([...binaryStr].map((c) => c.charCodeAt(0)));
+		return true;
+	} catch (e) {
+		return false;
+	}
+}
+
+// ------------------------------- 抓取的网页内容是否为v2ray/nekoray分享链接？ -------------------------------
+
+function v2rayLinksHandle(str) {
+	let isBase64Str = isValidBase64(str);
+
+	// let proxyPrefix = ['hysteria://', 'hy2://', 'vless://', 'vmess://', 'trojan://', 'ss://', 'tuic://', 'naive+https://'];
+	let proxyPrefix = [
+		'aHlzdGVyaWE6Ly8',
+		'aHkyOi8v',
+		'dmxlc3M6Ly8',
+		'dm1lc3M6Ly8',
+		'dHJvamFuOi8v',
+		'c3M6Ly8',
+		'dHVpYzovLw',
+		'bmFpdmUraHR0cHM6Ly8',
+	];
+	// 粗略判断是否为明文分享链接，是则原字符串返回
+	if (!isBase64Str && proxyPrefix.some((prefix) => str.includes(base64Decode(prefix)))) {
+		return str;
+	} else if (!isBase64Str) {
+		return ''; // 不是有效的 Base64，直接返回空字符串
+	}
+
+	try {
+		return base64Decode(str);
+	} catch (e) {
+		return ''; // 如果解码失败，也返回空字符串
+	}
+}
+
 // -------------------------------------------- 要抓取的网页链接 --------------------------------------------
 
 /**
- * 要抓取的网页，目标urls集，顺序随意，json、yaml数据都可以
- * 订阅地址的链接不能太多，容易出现"Error: Too many subrequests"错误，尽量保持在30条链接左右
+ * 要抓取的网页，目标urls集，顺序随意，json、yaml、v2ray明文/base64加密的订阅数据都可以
+ * 订阅地址的链接不能太多，容易出现"Error: Too many subrequests"错误，
+ * 免费计划：每个 Worker 最多 50 个子请求（包括 fetch() 请求）
+ * 付费计划：最多 1000 个子请求
  *
  * https://github.com/juerson/subscription_helper
  * 使用这个工具可以对订阅链接的内容比较，找出内容互不相同的链接，内容相同就选择其中的一个链接
  */
 const targetUrls = [
 	// ChromeGo/EdgeGo的订阅链接(已剔除内容重复的订阅链接)
-	'https://fastly.jsdelivr.net/gh/Alvin9999/pac2@latest/quick/4/config.yaml',
-	'https://fastly.jsdelivr.net/gh/Alvin9999/pac2@latest/quick/config.yaml',
-	'https://fastly.jsdelivr.net/gh/Alvin9999/pac2@latest/singbox/config.json',
-	'https://gitlab.com/free9999/ipupdate/-/raw/master/singbox/config.json',
+	'https://fastly.jsdelivr.net/gh/Alvin9999/PAC@latest/backup/img/1/2/ipp/naiveproxy/2/config.json',
+	'https://fastly.jsdelivr.net/gh/Alvin9999/PAC@latest/backup/img/1/2/ipp/hysteria2/2/config.json',
+	'https://www.gitlabip.xyz/Alvin9999/PAC/master/backup/img/1/2/ipp/hysteria2/3/config.json',
+	'https://www.gitlabip.xyz/Alvin9999/PAC/master/backup/img/1/2/ipp/naiveproxy/1/config.json',
+	'https://fastly.jsdelivr.net/gh/Alvin9999/PAC@latest/backup/img/1/2/ipp/xray/2/config.json',
+	'https://fastly.jsdelivr.net/gh/Alvin9999/PAC@latest/backup/img/1/2/ipp/xray/4/config.json',
+	'https://fastly.jsdelivr.net/gh/Alvin9999/PAC@latest/backup/img/1/2/ip/singbox/2/config.json',
+	'https://www.gitlabip.xyz/Alvin9999/PAC/master/backup/img/1/2/ipp/singbox/1/config.json',
+	'https://fastly.jsdelivr.net/gh/Alvin9999/PAC@latest/backup/img/1/2/ipp/hysteria/2/config.json',
+	'https://www.gitlabip.xyz/Alvin9999/PAC/master/backup/img/1/2/ipp/hysteria/3/config.json',
+	'https://www.gitlabip.xyz/Alvin9999/PAC/master/backup/img/1/2/ipp/hysteria/1/config.json',
+	'https://gitlab.com/free9999/ipupdate/-/raw/master/backup/img/1/2/ipp/hysteria/3/config.json',
+	'https://gitlab.com/free9999/ipupdate/-/raw/master/backup/img/1/2/ip/singbox/config.json',
 	'https://gitlab.com/free9999/ipupdate/-/raw/master/hysteria/2/config.json',
 	'https://gitlab.com/free9999/ipupdate/-/raw/master/hysteria2/2/config.json',
-	'https://fastly.jsdelivr.net/gh/Alvin9999/PAC@latest/naiveproxy/config.json',
-	'https://gitlab.com/free9999/ipupdate/-/raw/master/naiveproxy/config.json',
+	'https://www.gitlabip.xyz/Alvin9999/PAC/master/backup/img/1/2/ipp/clash.meta2/5/config.yaml',
+	'https://fastly.jsdelivr.net/gh/Alvin9999/PAC@latest/backup/img/1/2/ipp/clash.meta2/4/config.yaml',
+	'https://www.gitlabip.xyz/Alvin9999/PAC/master/backup/img/1/2/ipp/clash.meta2/1/config.yaml',
+	'https://fastly.jsdelivr.net/gh/jsvpn/jsproxy@dev/yule/20200325/1299699.md',
+	'https://www.gitlabip.xyz/Alvin9999/PAC/master/backup/img/1/2/ip/clash.meta2/1/config.yaml',
+	'https://fastly.jsdelivr.net/gh/Alvin9999/pac2@latest/quick/config.yaml',
+	'https://fastly.jsdelivr.net/gh/Alvin9999/pac2@latest/quick/4/config.yaml',
 	// 也可以添加其它来源且数据格式为json或yaml的订阅链接
 	'https://raw.githubusercontent.com/aiboboxx/clashfree/main/clash.yml',
+	// 可以添加明文v2ray分享链接的订阅或base64订阅链接
+	'https://raw.githubusercontent.com/aiboboxx/v2rayfree/main/v2',
+	'https://ghfast.top/https://raw.githubusercontent.com/free18/v2ray/refs/heads/main/v.txt',
 ];
 
 // --------------------------------------- 操作targetUrls和构建节点的入口 ------------------------------------
@@ -716,11 +806,11 @@ export default {
 			});
 
 			// 将数组拼接成一个字符串
-			// let resultString = sortedArray.join('\n');
-			let resultString = btoa(sortedArray.join('\n'));
+			let resultString = sortedArray.join('\n');
+			let base64String = base64Encode(resultString);
 
 			// 返回一个带有结果的响应
-			return new Response(resultString, {
+			return new Response(base64String, {
 				status: 200,
 				headers: {
 					'Content-Type': 'text/plain; charset=UTF-8',
