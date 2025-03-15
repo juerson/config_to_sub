@@ -676,7 +676,7 @@ function v2rayLinksHandle(str) {
 		'bmFpdmUraHR0cHM6Ly8',
 	];
 	// 粗略判断是否为明文分享链接，是则原字符串返回
-	if (!isBase64Str && proxyPrefix.some((prefix) => str.includes(base64Decode(prefix)))) {
+	if (typeof str === 'string' && !isBase64Str && proxyPrefix.some((prefix) => str.includes(base64Decode(prefix)))) {
 		return str;
 	} else if (!isBase64Str) {
 		return ''; // 不是有效的 Base64，直接返回空字符串
@@ -720,7 +720,7 @@ const targetUrls = [
 	'https://www.gitlabip.xyz/Alvin9999/PAC/master/backup/img/1/2/ipp/clash.meta2/5/config.yaml',
 	'https://fastly.jsdelivr.net/gh/Alvin9999/PAC@latest/backup/img/1/2/ipp/clash.meta2/4/config.yaml',
 	'https://www.gitlabip.xyz/Alvin9999/PAC/master/backup/img/1/2/ipp/clash.meta2/1/config.yaml',
-	'https://fastly.jsdelivr.net/gh/jsvpn/jsproxy@dev/yule/20200325/1299699.md',
+	// 'https://fastly.jsdelivr.net/gh/jsvpn/jsproxy@dev/yule/20200325/1299699.md',
 	'https://www.gitlabip.xyz/Alvin9999/PAC/master/backup/img/1/2/ip/clash.meta2/1/config.yaml',
 	'https://fastly.jsdelivr.net/gh/Alvin9999/pac2@latest/quick/config.yaml',
 	'https://fastly.jsdelivr.net/gh/Alvin9999/pac2@latest/quick/4/config.yaml',
